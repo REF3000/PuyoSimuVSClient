@@ -143,6 +143,8 @@ void SceneGameUpdate(){
 	} 
 	// 以下、通信対戦開始後の処理
 
+	if( m_decision_flag ) return; // 操作確定後は入力を受け付けない
+
 	if( GetStateKey(KEY_INPUT_LEFT) == 1 ){
 		if( checkControlFlag() )
 			moveLeft();
@@ -360,7 +362,13 @@ void beginTurn(){
 		return;
 	}
 	m_game.goNextStep();
-	m_decision_flag = false;
+	if( m_game.getStatus(1)==0 ) m_decision_flag = false;
+	if( m_game.getStatus(1)==1 ){
+		m_game.setAction(Action(0,0,0),1);
+		sendAction();
+		sendReady();
+		m_decision_flag = true;
+	}
 	m_control_pos = 3;
 	m_control_dir = 0;
 }

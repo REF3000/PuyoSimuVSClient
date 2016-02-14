@@ -61,16 +61,28 @@ struct Field{
 	}
 private:
 	int doCountConnection( int x, int y, int puyo, int flag[W][H] );
+	int doDeleteConnection( int x, int y, int puyo );
 public:
 	int countConnection( int x, int y ){
 		const int puyo = get(x,y);
-		if( puyo<1 || 4<puyo ) return 0;
+		if( !(1<=puyo && puyo<=4) ) return 0;
 		int flag[W][H] = {0};
 		return doCountConnection( x, y, puyo, flag );
 	}
 	int deleteConnection( int x, int y ){
-		printf("delete:(%d,%d)\n",x,y);
-		return 0;
+		const int puyo = get(x,y);
+		if( !(1<=puyo && puyo<=4) ) return 0;
+		return doDeleteConnection( x, y, puyo );
+	}
+	int fall(){
+		int fallen_flag = 0;
+		for( int x=1; x<=6; ++x ){
+			vector<int> tmp;
+			for( int y=1; y<=13; ++y ) if(get(x,y)) tmp.push_back(get(x,y));
+			for( int y=1; y<=13; ++y ) set(x,y,0), fallen_flag=1;
+			for( size_t i=0; i<tmp.size(); ++i) set( x,i+1,tmp[i] );
+		}
+		return fallen_flag;
 	}
 };
 
@@ -107,7 +119,7 @@ struct Game{
 	int turn;      // 経過ターン数
 	vector<Action> history[2];
 	Action action[2];
-	int status[2];
+	int status[2]; // 0:非連鎖時 1:連鎖中
 
 	Game(){
 		turn = 0;
@@ -132,26 +144,40 @@ struct Game{
 	Action getAction( int player_id ){
 		return action[player_id-1];
 	}
-	int tryForwardChain(int player_id){
+	void tryForwardChain(int id){
 		for( int x=1; x<=6; ++x ){
 		for( int y=1; y<=12; ++y ){
-			int n = field[player_id-1].countConnection(x,y);
-			if( n>=4 ){
-				field[player_id-1].deleteConnection(x,y);
-			}
+			int n = field[id].countConnection(x,y);
+			if( n>=4 ) field[id].deleteConnection(x,y);
 		}}
-		return 0;
+	}
+	bool canFire( int id ){
+		for( int x=1; x<=6; ++x ){
+		for( int y=1; y<=12; ++y ){
+			int n = field[id].countConnection(x,y);
+			if( n>=4 ) return true;
+		}}
+		return false;
 	}
 	void goNextStep(){
-		field[0].set(action[0],getNextTumo(0,1));
-		field[1].set(action[1],getNextTumo(0,2));
-		history[0].push_back(action[0]);
-		history[1].push_back(action[1]);
-		// 連鎖判定
-		tryForwardChain(1);
-		tryForwardChain(2);
-		action[0] = Action();
-		action[1] = Action();
+		for( int i=0; i<2; ++i ){
+			if( action[i].id==-1 ){
+				printf("actionがセットされていない :player%d",i+1);
+				return;
+			}
+		}
+		for( int id=0; id<2; ++id ){		
+			if( status[id]==0 ){
+				field[id].set(action[id],getNextTumo(0,id+1));
+				if( canFire(id) ) status[id] = 1;
+			} else {
+				tryForwardChain(id);
+				field[id].fall();
+				if( !canFire(id) ) status[id] = 0;
+			}
+			history[id].push_back(action[id]);
+			action[id] = Action();
+		}
 		turn++;
 	}
 	int getStatus( int player_id ){
