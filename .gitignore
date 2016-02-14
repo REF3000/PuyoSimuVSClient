@@ -1,0 +1,11 @@
+/Release/
+
+/Debug/
+
+/ipch/
+
+PuyoSimuVSClient.opensdf
+PuyoSimuVSClient.sdf
+PuyoSimuVSClient.suo
+PuyoSimuVSClient.vcxproj.filters
+PuyoSimuVSClient.vcxproj.user
