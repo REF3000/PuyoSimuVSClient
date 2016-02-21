@@ -12,12 +12,14 @@ static int m_flame; // 経過フレーム数
 
 static SOCKET m_socket;
 static Game m_game;
-static int m_control_pos; // 操作中ツモの軸位置(1-6)
+static int m_control_x; // 操作中ツモの軸x位置(1-6)
+static int m_control_y; // 操作中ツモの軸y位置(1-13)
 static int m_control_dir; // 操作中ツモの回転数(0-3)
 static bool m_decision_flag; // 操作を確定したかどうかのフラグ
 
 static bool m_network_vs_flag; // 通信対戦中かどうかのフラグ
 
+static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 /*----------------------------------------------------------------------*/
 //      初期化
 /*----------------------------------------------------------------------*/
@@ -75,19 +77,23 @@ void SceneGameInit(){
 	cout<<"ニックネームを送信:"<<nickname<<endl;
 	cout<<"ランダムマッチに参加申請を送信"<<endl;
 
-	m_control_pos = 3;
+	m_control_x = 3;
+	m_control_y = 13;
 	m_control_dir = 0;
 
 	m_network_vs_flag = false;
 
 	m_flame = 0;
 	m_decision_flag = true;
+
+	m_ready_flag = false;
 }
 
 void beginNetworkVS(){
 	if( m_network_vs_flag ) return;
 	m_network_vs_flag = true;
 	m_decision_flag = false;
+	m_game.init();
 }
 
 /*----------------------------------------------------------------------*/
@@ -109,23 +115,23 @@ bool checkControlFlag(){
 	return m_game.getAction(1).id==-1;
 }
 void moveLeft(){
-	if( m_control_pos<=1 ) return;
-	if( m_control_pos==2 && m_control_dir==3 ) return;
-	m_control_pos--;
+	if( m_control_x<=1 ) return;
+	if( m_control_x==2 && m_control_dir==3 ) return;
+	m_control_x--;
 }
 void moveRight(){
-	if( m_control_pos>=6 ) return;
-	if( m_control_pos==5 && m_control_dir==1 ) return;
-	m_control_pos++;
+	if( m_control_x>=6 ) return;
+	if( m_control_x==5 && m_control_dir==1 ) return;
+	m_control_x++;
 }
 void rotateRight(){
-	if( m_control_pos==1 && m_control_dir==2 ) return;
-	if( m_control_pos==6 && m_control_dir==0 ) return;
+	if( m_control_x==1 && m_control_dir==2 ) return;
+	if( m_control_x==6 && m_control_dir==0 ) return;
 	m_control_dir = (m_control_dir+1)%4;
 }
 void rotateLeft(){
-	if( m_control_pos==1 && m_control_dir==0 ) return;
-	if( m_control_pos==6 && m_control_dir==2 ) return;
+	if( m_control_x==1 && m_control_dir==0 ) return;
+	if( m_control_x==6 && m_control_dir==2 ) return;
 	m_control_dir = (m_control_dir+3)%4;
 }
 void SceneGameUpdate(){
@@ -133,12 +139,11 @@ void SceneGameUpdate(){
 	processRecv();
 
 	// 通信対戦開始前の処理
-	if( !m_network_vs_flag ){
-
+	if( !m_network_vs_flag && !m_ready_flag ){
 		if( GetStateKey(KEY_INPUT_RETURN) == 1 ){
 			sendReady();
 		}
-
+		m_ready_flag = true;
 		return;
 	} 
 	// 以下、通信対戦開始後の処理
@@ -163,7 +168,7 @@ void SceneGameUpdate(){
 	}
 	if( GetStateKey(KEY_INPUT_DOWN) == 1 ){
 		if( checkControlFlag() ){
-			m_game.setAction( Action(1,m_control_pos,m_control_dir),1 );
+			m_game.setAction( Action(1,m_control_x,m_control_dir),1 );
 			sendAction();
 			sendReady();
 			m_decision_flag = true;
@@ -213,22 +218,20 @@ void doDrawField( int left, int top, Field field ){
 void drawField( Field field, int player_id ){
 	doDrawField( LEFT+(player_id==2?GAP:0), TOP, field );
 }
-void drawTumo( int pos, int dir, Tumo tumo, int player_id ){
+void drawTumo( int x, int y, int dir, Tumo tumo, int player_id ){
 	// TODO:きれいに書く
-	int x  = pos;
-	int y  = 13;
 	int sx = x+(dir==1?1:(dir==3?-1:0));
 	int sy = y+(dir==0?1:(dir==2?-1:0));
 	if( checkControlFlag() && m_decision_flag==false && player_id==1 && ((m_flame%60)>30) ){
-		drawPuyo( LEFT+( x-0.5)*CELL_W+(player_id==2?GAP:0), TOP+ (13-y+0.5)*CELL_H, CELL_W, CELL_H, 9 );
-		drawPuyo( LEFT+(sx-0.5)*CELL_W+(player_id==2?GAP:0), TOP+(13-sy+0.5)*CELL_H, CELL_W, CELL_H, 9 );
+		drawPuyo( LEFT+(int)(( x-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)(( 13-y+0.5)*CELL_H), CELL_W, CELL_H, 9 );
+		drawPuyo( LEFT+(int)((sx-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)((13-sy+0.5)*CELL_H), CELL_W, CELL_H, 9 );
 	}
 	if( m_network_vs_flag && m_game.getAction(2).id==-1 && player_id==2 && ((m_flame%60)>30) ){
-		drawPuyo( LEFT+( x-0.5)*CELL_W+(player_id==2?GAP:0), TOP+ (13-y+0.5)*CELL_H, CELL_W, CELL_H, 9 );
-		drawPuyo( LEFT+(sx-0.5)*CELL_W+(player_id==2?GAP:0), TOP+(13-sy+0.5)*CELL_H, CELL_W, CELL_H, 9 );
+		drawPuyo( LEFT+(int)(( x-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)(( 13-y+0.5)*CELL_H), CELL_W, CELL_H, 9 );
+		drawPuyo( LEFT+(int)((sx-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)((13-sy+0.5)*CELL_H), CELL_W, CELL_H, 9 );
 	}
-	drawPuyo( LEFT+( x-0.5)*CELL_W+(player_id==2?GAP:0), TOP+ (13-y+0.5)*CELL_H, CELL_W-1, CELL_H-1, tumo.first );
-	drawPuyo( LEFT+(sx-0.5)*CELL_W+(player_id==2?GAP:0), TOP+(13-sy+0.5)*CELL_H, CELL_W-1, CELL_H-1, tumo.second );
+	drawPuyo( LEFT+(int)(( x-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)(( 13-y+0.5)*CELL_H), CELL_W-1, CELL_H-1, tumo.first );
+	drawPuyo( LEFT+(int)((sx-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)((13-sy+0.5)*CELL_H), CELL_W-1, CELL_H-1, tumo.second );
 }
 void drawNext( Tumo next1p1, Tumo next2p1, Tumo next1p2, Tumo next2p2 ){
 	// 1p
@@ -242,19 +245,37 @@ void drawNext( Tumo next1p1, Tumo next2p1, Tumo next1p2, Tumo next2p2 ){
 	drawPuyo( 342, 145       , CELL_W-4, CELL_H-4, next2p2.second );
 	drawPuyo( 342, 145+CELL_H, CELL_W-4, CELL_H-4, next2p2.first  );
 }
+void drawInfo(){
+	// 1p
+	DrawFormatString( 270,10,GetColor(255,255,255),"%d:%d", m_game.getOjamaStock(1), m_game.getOjamaNotice(1) );
+	// 2p
+	DrawFormatString( 340,10,GetColor(255,255,255),"%d:%d", m_game.getOjamaStock(2), m_game.getOjamaNotice(2) );
+}
+void drawScore(){
+	// 1p
+	DrawFormatString( 100,445,GetColor(255,255,255),"score:%d", m_game.getScore(1) );
+	// 2p
+	DrawFormatString( 360,445,GetColor(255,255,255),"score:%d", m_game.getScore(2) );
+}
 void SceneGameDraw(){
 	drawField( m_game.getMyField(),    1 );
 	drawField( m_game.getEnemyField(), 2 );
-	drawTumo( m_control_pos, m_control_dir, m_game.getNextTumo(0,1), 1 );
-	drawTumo(             2,             0, m_game.getNextTumo(0,2), 2 );
+	drawTumo( m_control_x, m_control_y, m_control_dir, m_game.getNextTumo(0,1), 1 );
+	drawTumo(           3,          13,             0, m_game.getNextTumo(0,2), 2 );
 	drawNext( m_game.getNextTumo(1,1), m_game.getNextTumo(2,1),
 		m_game.getNextTumo(1,2), m_game.getNextTumo(2,2) );
+	drawInfo();
+	drawScore();
 }
 
 /*----------------------------------------------------------------------*/
 //      終了処理
 /*----------------------------------------------------------------------*/
 void SceneGameFin(){
+	char buf[] = {6,0};
+	send(m_socket, buf, sizeof(buf), 0);
+	cout<<"finを送信"<<endl;
+
 	closesocket(m_socket);
 	WSACleanup();
 }
@@ -369,7 +390,8 @@ void beginTurn(){
 		sendReady();
 		m_decision_flag = true;
 	}
-	m_control_pos = 3;
+	m_control_x = 3;
+	m_control_y = 13;
 	m_control_dir = 0;
 }
 void setEnemyAction( char buf[] ){
@@ -377,3 +399,4 @@ void setEnemyAction( char buf[] ){
 	Action act( buf[0], buf[1], buf[2] );
 	m_game.setAction(act,2);
 }
+

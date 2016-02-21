@@ -13,6 +13,7 @@ int Field::doCountConnection( int x, int y, int puyo, int flag[W][H] ){
 }
 int Field::doDeleteConnection( int x, int y, int puyo ){
 	if( !( 1<=x && x<=6 && 1<=y && y<=12 ) ) return 0;
+	if( get(x,y)==9 ){ set(x,y,0); return 0; } // ‚¨‚¶‚á‚Üíœ
 	if( get(x,y)!=puyo ) return 0;
 	set(x,y,0);
 	return doDeleteConnection( x, y+1, puyo ) +
@@ -20,3 +21,4 @@ int Field::doDeleteConnection( int x, int y, int puyo ){
 		   doDeleteConnection( x, y-1, puyo ) +
 		   doDeleteConnection( x-1, y, puyo ) + 1;
 }
+const int Game::OJAMA_TABLE[] = {1,2,3,4,5,6};

@@ -40,6 +40,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
 	ChangeWindowMode(TRUE);                    // ウィンドウモード
 	SetOutApplicationLogValidFlag( FALSE );    // ログの出力抑制
 	SetMainWindowText( "PuyoSimuVSClient" ) ;  // ウィンドウタイトル
+	SetWindowUserCloseEnableFlag(FALSE);       // ウィンドウバツボタンで強制終了しない
     if(DxLib_Init() == -1 || SetDrawScreen( DX_SCREEN_BACK )!=0) return -1; //初期化と裏画面化
 	//SetDragFileValidFlag(TRUE);                // D&Dを許可
 	
@@ -54,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
 	}
 
 	SceneGameInit();
-	while( ProcessLoop()==0 ){ //メインループ
+	while( ProcessLoop()==0 && !GetWindowUserCloseFlag() ){ //メインループ
 		SceneGameUpdate();
 		SceneGameDraw();
 		ScreenFlip_2(); //裏画面を反映して待機
