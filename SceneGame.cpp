@@ -142,8 +142,8 @@ void SceneGameUpdate(){
 	if( !m_network_vs_flag && !m_ready_flag ){
 		if( GetStateKey(KEY_INPUT_RETURN) == 1 ){
 			sendReady();
+			m_ready_flag = true;
 		}
-		m_ready_flag = true;
 		return;
 	} 
 	// 以下、通信対戦開始後の処理

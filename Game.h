@@ -41,7 +41,7 @@ struct Field{
 		for( int y=1; y<=13; ++y ){
 			if( get(x,y)==0 ){
 				set(x,y,puyo);
-				return 0;
+				return y;
 			}
 		}
 		return -1;
@@ -50,14 +50,15 @@ struct Field{
 		if( act.id==0 ) return 0;
 		int fx = act.pos;
 		int sx = act.pos+(act.dir==1?1:(act.dir==3?-1:0));
+		int y;
 		if( act.dir==2 ){
-			set( sx, tumo.second );
-			set( fx, tumo.first );
+			    set( sx, tumo.second );
+			y = set( fx, tumo.first );
 		} else {
-			set( fx, tumo.first );
-			set( sx, tumo.second );
+			y = set( fx, tumo.first );
+			    set( sx, tumo.second );
 		}
-		return 0;
+		return 13-y;
 	}
 private:
 	int doCountConnection( int x, int y, int puyo, int flag[W][H] );
@@ -121,6 +122,7 @@ struct Game{
 	Action action[2];
 	int status[2]; // 0:非連鎖時 1:連鎖中
 	int score[2];
+	int ojama_score[2];
 	int chain_count[2];
 	int ojama_notice[2];
 	int ojama_stock[2];
@@ -163,9 +165,12 @@ struct Game{
 		return action[player_id-1];
 	}
 	void addScore( int id, int score ){
-		int rest = this->score[id]%70;
 		this->score[id] += score;
-		int ojama = (score+rest)/70;
+		ojama_score[id] += score;
+	}
+	void processOjamaScore( int id ){
+		int ojama = ojama_score[id]/70;
+		ojama_score[id] -= ojama*70;
 		// 相殺（notice）
 		if( ojama<ojama_notice[id] ){
 			ojama_notice[id] -= ojama;
@@ -207,6 +212,7 @@ struct Game{
 		bonas += B[color_cnt-1];
 		if( bonas==0 ) bonas=1;
 		addScore( id, score*bonas );
+		processOjamaScore( id );
 	}
 	bool canFire( int id ){
 		for( int x=1; x<=6; ++x ){
@@ -240,7 +246,8 @@ struct Game{
 		int ojama_trans_flag[2]={};
 		for( int id=0; id<2; ++id ){
 			if( status[id]==0 ){ // 非連鎖中
-				field[id].set(action[id],getNextTumo(0,id+1));
+				int fall_d = field[id].set(action[id],getNextTumo(0,id+1));
+				addScore( id, fall_d );
 				if( canFire(id) ){
 					status[id] = 1;
 					continue;
