@@ -29,6 +29,7 @@ struct Field{
 				field[i][j]=0;
 	}
 	int get( int x, int y ){
+		if( x>=1 && x<=6 && y==14 ) return 0;
 		if( x<1 || x>6 || y<1 || y>13 ) return -1;
 		return field[x-1][y-1];
 	}

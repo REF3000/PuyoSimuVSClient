@@ -20,6 +20,10 @@ static bool m_decision_flag; // 操作を確定したかどうかのフラグ
 static bool m_network_vs_flag; // 通信対戦中かどうかのフラグ
 
 static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
+
+#define m_myfield ( m_game.getMyField() )
+#define m_sub_x ( m_control_x + (m_control_dir==1?1:(m_control_dir==3?-1:0)) )
+#define m_sub_y ( m_control_y + (m_control_dir==0?1:(m_control_dir==2?-1:0)) )
 /*----------------------------------------------------------------------*/
 //      初期化
 /*----------------------------------------------------------------------*/
@@ -115,23 +119,39 @@ bool checkControlFlag(){
 	return m_game.getAction(1).id==-1;
 }
 void moveLeft(){
-	if( m_control_x<=1 ) return;
-	if( m_control_x==2 && m_control_dir==3 ) return;
-	m_control_x--;
+	--m_control_x;
+	// 左に障害物
+	if( m_myfield.get(m_control_x,m_control_y)!=0 ) ++m_control_x;
+	if( m_myfield.get(    m_sub_x,    m_sub_y)!=0 ) ++m_control_x;
 }
 void moveRight(){
-	if( m_control_x>=6 ) return;
-	if( m_control_x==5 && m_control_dir==1 ) return;
-	m_control_x++;
+	++m_control_x;
+	// 右に障害物
+	if( m_myfield.get(m_control_x,m_control_y)!=0 ) --m_control_x;
+	if( m_myfield.get(    m_sub_x,    m_sub_y)!=0 ) --m_control_x;
 }
 void rotateRight(){
-	if( m_control_x==1 && m_control_dir==2 ) return;
-	if( m_control_x==6 && m_control_dir==0 ) return;
+	// 下に障害物
+	if( m_control_dir==1 && m_myfield.get(m_control_x,12)!=0 ) return;
+	// 左右に障害物
+	if( m_myfield.get(m_control_x-1,13)!=0 && m_myfield.get(m_control_x+1,13)!=0 ) return;
+	// 左に障害物
+	if( m_control_dir==2 && m_myfield.get(m_control_x-1,13)!=0 ) ++m_control_x;
+	// 右に障害物
+	if( m_control_dir==0 && m_myfield.get(m_control_x+1,13)!=0 ) --m_control_x;
+
 	m_control_dir = (m_control_dir+1)%4;
 }
 void rotateLeft(){
-	if( m_control_x==1 && m_control_dir==0 ) return;
-	if( m_control_x==6 && m_control_dir==2 ) return;
+	// 下に障害物
+	if( m_control_dir==3 && m_myfield.get(m_control_x,12)!=0 ) return;
+	// 左右に障害物
+	if( m_myfield.get(m_control_x-1,13)!=0 && m_myfield.get(m_control_x+1,13)!=0 ) return;
+	// 左に障害物
+	if( m_control_dir==0 && m_myfield.get(m_control_x-1,13)!=0 ) ++m_control_x;
+	// 右に障害物
+	if( m_control_dir==2 && m_myfield.get(m_control_x+1,13)!=0 ) --m_control_x;
+
 	m_control_dir = (m_control_dir+3)%4;
 }
 void SceneGameUpdate(){
