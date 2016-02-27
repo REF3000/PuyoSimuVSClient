@@ -203,9 +203,18 @@ int SceneNetworkPlayUpdate(){
 			sendAction();
 			sendReady();
 			m_decision_flag = true;
+			return 0;
 		}
 	}
-
+	if( GetStateKey(KEY_INPUT_P) == 1 ){
+		if( checkControlFlag() && m_game.getHistory(1,1).id!=0 ){
+			m_game.setAction( Action(0,0,0),1 );
+			sendAction();
+			sendReady();
+			m_decision_flag = true;
+			return 0;
+		}
+	}
 	return 0;
 }
 

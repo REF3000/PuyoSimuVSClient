@@ -249,15 +249,17 @@ struct Game{
 		int ojama_trans_flag[2]={};
 		for( int id=0; id<2; ++id ){
 			if( status[id]==0 ){ // ”ñ˜A½’†
-				int fall_d = field[id].set(action[id],getNextTumo(0,id+1));
-				addScore( id, fall_d );
-				if( canFire(id) ){
-					status[id] = 1;
-					continue;
+				if( action[id].id==1 ){
+					int fall_d = field[id].set(action[id],getNextTumo(0,id+1));
+					addScore( id, fall_d );
+					if( canFire(id) ){
+						status[id] = 1;
+						continue;
+					}
+					// TODO:’‚‘§”»’è
+					fallOjama( id );
+					// TODO:’‚‘§”»’è2
 				}
-				// TODO:’‚‘§”»’è
-				fallOjama( id );
-				// TODO:’‚‘§”»’è2
 			} else {             // ˜A½’†
 				forwardChain(id);
 				field[id].fall();
@@ -290,5 +292,12 @@ struct Game{
 	}
 	int getScore( int player_id ){
 		return score[player_id-1];
+	}
+	Action getHistory( int player_id, int num ){
+		if( turn-num<0 ) return Action();
+		return history[player_id-1][turn-num];
+	}
+	int getTurn(){
+		return turn+1;
 	}
 };
