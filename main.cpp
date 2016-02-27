@@ -8,7 +8,8 @@
 #include "DxLib.h"
 #include "input.h"
 #include "Fps.h"
-#include "SceneGame.h"
+#include "SceneManager.h"
+SceneManager scene_manager;
 /*----------------------------------------------------------------------*/
 //      ループで必ず行う処理                             
 /*----------------------------------------------------------------------*/
@@ -54,13 +55,12 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
         //freopen("CONIN$", "r", stdin);
 	}
 
-	SceneGameInit();
 	while( ProcessLoop()==0 && !GetWindowUserCloseFlag() ){ //メインループ
-		SceneGameUpdate();
-		SceneGameDraw();
+		if( scene_manager.update()!=0 ) break;
+		scene_manager.draw();
 		ScreenFlip_2(); //裏画面を反映して待機
 	}
-	SceneGameFin();
+	scene_manager.fin();
 
 	fclose( dbgstream );
 	FreeConsole();

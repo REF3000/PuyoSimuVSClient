@@ -138,11 +138,13 @@ struct Game{
 		for( int i=0; i<2; ++i ){
 			status[i] = 0;
 			score[i] = 0;
+			ojama_score[i] = 0;
 			action[i] = Action();
 			chain_count[i] = 0;
 			ojama_notice[i] = 0;
 			ojama_stock[i] = 0;
 			ojama_count[i] = 0;
+			field[i].init();
 		}
 	}
 	Field &getMyField(){

@@ -1,4 +1,5 @@
-#include "SceneGame.h"
+#include "SceneManager.h"
+#include "SceneNetworkPlay.h"
 #include "DxLib.h"
 #include "input.h"
 #include "Game.h"
@@ -7,6 +8,8 @@
 #include <string>
 using namespace std;
 //#include <winsock2.h>
+
+extern SceneManager scene_manager;
 
 static int m_flame; // 経過フレーム数
 
@@ -33,7 +36,7 @@ void loadConfig( string &hostname, int &port, string &nickname ){
 	if( !ifs ){ cout<<"setting.conf のオープンに失敗"<<endl; return;}
 	ifs >> hostname >> port >> nickname;
 }
-void SceneGameInit(){
+void SceneNetworkPlayInit(){
 
 	string hostname = "localhost";
 	string nickname = "NO_NAME";
@@ -91,6 +94,8 @@ void SceneGameInit(){
 	m_decision_flag = true;
 
 	m_ready_flag = false;
+
+	m_game.init();
 }
 
 void beginNetworkVS(){
@@ -154,9 +159,15 @@ void rotateLeft(){
 
 	m_control_dir = (m_control_dir+3)%4;
 }
-void SceneGameUpdate(){
+int SceneNetworkPlayUpdate(){
 	++m_flame;
 	processRecv();
+
+	// 
+	if( GetStateKey(KEY_INPUT_ESCAPE) == 1 ){
+		scene_manager.setNextScene( TITLE );
+		return 0;
+	}
 
 	// 通信対戦開始前の処理
 	if( !m_network_vs_flag && !m_ready_flag ){
@@ -164,11 +175,11 @@ void SceneGameUpdate(){
 			sendReady();
 			m_ready_flag = true;
 		}
-		return;
+		return 0;
 	} 
 	// 以下、通信対戦開始後の処理
 
-	if( m_decision_flag ) return; // 操作確定後は入力を受け付けない
+	if( m_decision_flag ) return 0; // 操作確定後は入力を受け付けない
 
 	if( GetStateKey(KEY_INPUT_LEFT) == 1 ){
 		if( checkControlFlag() )
@@ -195,6 +206,7 @@ void SceneGameUpdate(){
 		}
 	}
 
+	return 0;
 }
 
 /*----------------------------------------------------------------------*/
@@ -277,7 +289,7 @@ void drawScore(){
 	// 2p
 	DrawFormatString( 360,445,GetColor(255,255,255),"score:%d", m_game.getScore(2) );
 }
-void SceneGameDraw(){
+void SceneNetworkPlayDraw(){
 	drawField( m_game.getMyField(),    1 );
 	drawField( m_game.getEnemyField(), 2 );
 	drawTumo( m_control_x, m_control_y, m_control_dir, m_game.getNextTumo(0,1), 1 );
@@ -291,7 +303,7 @@ void SceneGameDraw(){
 /*----------------------------------------------------------------------*/
 //      終了処理
 /*----------------------------------------------------------------------*/
-void SceneGameFin(){
+void SceneNetworkPlayFin(){
 	char buf[] = {6,0};
 	send(m_socket, buf, sizeof(buf), 0);
 	cout<<"finを送信"<<endl;

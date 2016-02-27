@@ -15,13 +15,17 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SceneGame.cpp" />
+    <ClCompile Include="SceneNetworkPlay.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SceneTitle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Fps.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
-    <ClInclude Include="SceneGame.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SceneNetworkPlay.h" />
+    <ClInclude Include="SceneTitle.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C173D742-BAD8-4EA0-99BE-B7E5BA174073}</ProjectGuid>
