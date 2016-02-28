@@ -168,6 +168,9 @@ int SceneNetworkPlayUpdate(){
 		scene_manager.setNextScene( TITLE );
 		return 0;
 	}
+	if( GetStateKey(KEY_INPUT_D) == 1 ){
+		m_game.debug();
+	}
 
 	// 通信対戦開始前の処理
 	if( !m_network_vs_flag && !m_ready_flag ){

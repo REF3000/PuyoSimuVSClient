@@ -145,6 +145,8 @@ struct Game{
 			ojama_stock[i] = 0;
 			ojama_count[i] = 0;
 			field[i].init();
+			history[i].clear();
+
 		}
 	}
 	Field &getMyField(){
@@ -251,27 +253,30 @@ struct Game{
 			if( status[id]==0 ){ // 非連鎖中
 				if( action[id].id==1 ){
 					int fall_d = field[id].set(action[id],getNextTumo(0,id+1));
-					addScore( id, fall_d );
+					if( !history[id].empty() && history[id].back().id==0 ) fall_d = 0;
+					addScore( id, fall_d ); // 前回がパス以外なら落下ボーナス付与
 					if( canFire(id) ){
 						status[id] = 1;
-						continue;
+						//continue;
+					} else {
+						// TODO:窒息判定
+						fallOjama( id );
+						// TODO:窒息判定2
 					}
-					// TODO:窒息判定
-					fallOjama( id );
-					// TODO:窒息判定2
 				}
 			} else {             // 連鎖中
 				forwardChain(id);
 				field[id].fall();
 				if( canFire(id) ){
-					continue;
+					//continue;
+				} else {
+					// TODO:窒息判定
+					fallOjama( id );
+					ojama_trans_flag[ (id+1)%2 ] = true;
+					// TODO:窒息判定2
+					status[id] = 0;
+					chain_count[id] = 0;
 				}
-				// TODO:窒息判定
-				fallOjama( id );
-				ojama_trans_flag[ (id+1)%2 ] = true;
-				// TODO:窒息判定2
-				status[id] = 0;
-				chain_count[id] = 0;
 			}
 			history[id].push_back(action[id]);
 			action[id] = Action();
@@ -299,5 +304,14 @@ struct Game{
 	}
 	int getTurn(){
 		return turn+1;
+	}
+
+	void debug(){
+		int cnt = 0; // 現在までのパスでない手数を数える
+		int id = 0;
+		cout<<"debug"<<endl;
+		for( size_t i=0; i<history[id].size(); ++i ) cnt+=(history[id][i].id==1), cout<<history[id][i].id<<",";
+		cout<<"sum:"<<cnt<<endl;
+		//return next.get(cnt+num);
 	}
 };
