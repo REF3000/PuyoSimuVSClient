@@ -24,6 +24,8 @@ static bool m_network_vs_flag; // 通信対戦中かどうかのフラグ
 
 static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 
+static int m_graphic_handle[256];
+
 #define m_myfield ( m_game.getMyField() )
 #define m_sub_x ( m_control_x + (m_control_dir==1?1:(m_control_dir==3?-1:0)) )
 #define m_sub_y ( m_control_y + (m_control_dir==0?1:(m_control_dir==2?-1:0)) )
@@ -37,6 +39,8 @@ void loadConfig( string &hostname, int &port, string &nickname ){
 	ifs >> hostname >> port >> nickname;
 }
 void SceneNetworkPlayInit(){
+
+	LoadDivGraph( "data/ojama.png" , 7 , 7 , 1 , 24 , 24 , m_graphic_handle ) ;
 
 	string hostname = "localhost";
 	string nickname = "NO_NAME";
@@ -301,6 +305,31 @@ void drawScore(){
 	// 2p
 	DrawFormatString( 360,445,GetColor(255,255,255),"score:%d", m_game.getScore(2) );
 }
+void drawOjamaNotice( int ojama_num, int player_id ){
+	const int SX = (player_id==1) ? 95 : 365;
+	const int SY = 15;
+
+	vector<int> ojama;
+	while( ojama_num>0 ){
+		if( ojama_num >= 400 ){ ojama_num-=400; ojama.push_back(5); continue; }
+		if( ojama_num >= 300 ){ ojama_num-=300; ojama.push_back(4); continue; }
+		if( ojama_num >= 200 ){ ojama_num-=200; ojama.push_back(3); continue; }
+		if( ojama_num >=  30 ){ ojama_num-= 30; ojama.push_back(2); continue; }
+		if( ojama_num >=   6 ){ ojama_num-=  6; ojama.push_back(1); continue; }
+		if( ojama_num >=   1 ){ ojama_num-=  1; ojama.push_back(0); continue; }
+	}
+	int lim=65;
+	int x = SX;
+	int y = SY;
+	for( size_t i=0; i<ojama.size(); ++i ){
+		int o = ojama[i];
+		if( o==0 ) lim-= 5;
+		else       lim-=10;
+		if( lim<0 ) break; // 6.5超えたら省略
+		DrawExtendGraph( x, y, x+36, y+36, m_graphic_handle[o], true );
+		x += (o==0) ? 20:28;
+	}
+}
 void SceneNetworkPlayDraw(){
 	drawField( m_game.getMyField(),    1 );
 	drawField( m_game.getEnemyField(), 2 );
@@ -310,6 +339,8 @@ void SceneNetworkPlayDraw(){
 		m_game.getNextTumo(1,2), m_game.getNextTumo(2,2) );
 	drawInfo();
 	drawScore();
+	drawOjamaNotice( m_game.getOjamaNotice(1) + m_game.getOjamaStock(1), 1 );
+	drawOjamaNotice( m_game.getOjamaNotice(2) + m_game.getOjamaStock(2), 2 );
 }
 
 /*----------------------------------------------------------------------*/
