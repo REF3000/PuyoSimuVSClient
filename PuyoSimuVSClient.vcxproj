@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Annimation.cpp" />
     <ClCompile Include="Fps.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
@@ -20,6 +21,8 @@
     <ClCompile Include="SceneTitle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Annimation.h" />
+    <ClInclude Include="AnnimationManager.h" />
     <ClInclude Include="Fps.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />

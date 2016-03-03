@@ -3,9 +3,11 @@
 #include "DxLib.h"
 #include "input.h"
 #include "Game.h"
+#include "AnnimationManager.h"
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <queue>
 using namespace std;
 //#include <winsock2.h>
 
@@ -25,6 +27,8 @@ static bool m_network_vs_flag; // 通信対戦中かどうかのフラグ
 static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 
 static int m_graphic_handle[256];
+
+static AnnimationManager m_annimation_manager;
 
 #define m_myfield ( m_game.getMyField() )
 #define m_sub_x ( m_control_x + (m_control_dir==1?1:(m_control_dir==3?-1:0)) )
@@ -166,7 +170,7 @@ void rotateLeft(){
 int SceneNetworkPlayUpdate(){
 	++m_flame;
 	processRecv();
-
+	m_annimation_manager.update();
 	// 
 	if( GetStateKey(KEY_INPUT_ESCAPE) == 1 ){
 		scene_manager.setNextScene( TITLE );
@@ -341,6 +345,7 @@ void SceneNetworkPlayDraw(){
 	drawScore();
 	drawOjamaNotice( m_game.getOjamaNotice(1) + m_game.getOjamaStock(1), 1 );
 	drawOjamaNotice( m_game.getOjamaNotice(2) + m_game.getOjamaStock(2), 2 );
+	m_annimation_manager.draw();
 }
 
 /*----------------------------------------------------------------------*/
@@ -457,6 +462,16 @@ void beginTurn(){
 		beginNetworkVS();
 		return;
 	}
+	// 設置アニメーション
+	for( int i=0; i<2; ++i ){
+		//Action act = m_game.getHistory(1+i,0);
+		
+		//if( act.id!=1 ) continue;
+		//printf("%d:(%d,%d,%d)\n",i+1,act.id,act.pos,act.dir);
+		//fallAnnimation *anime = new fallAnnimation( act.pos*30, 50, 500, GetColor(255,0,0) );
+		//m_annimation_manager.add( anime );
+	}
+
 	m_game.goNextStep();
 	if( m_game.getStatus(1)==0 ) m_decision_flag = false;
 	if( m_game.getStatus(1)==1 ){
