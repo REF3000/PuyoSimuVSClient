@@ -20,6 +20,7 @@
     <ClCompile Include="SceneNetworkPlay.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneTitle.cpp" />
+    <ClCompile Include="Setting.cpp" />
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +33,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneNetworkPlay.h" />
     <ClInclude Include="SceneTitle.h" />
+    <ClInclude Include="Setting.h" />
     <ClInclude Include="UI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

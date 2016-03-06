@@ -5,19 +5,19 @@
 #include "Game.h"
 #include "UI.h"
 #include "Connection.h"
-#include "AnnimationManager.h"
+#include "Setting.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <queue>
 using namespace std;
-//#include <winsock2.h>
 
 extern SceneManager scene_manager;
 
 static Game m_game;
 static Connection m_connection;
 static UI m_ui;
+static Setting m_setting;
+
 static int m_control_x; // 操作中ツモの軸x位置(1-6)
 static int m_control_y; // 操作中ツモの軸y位置(1-13)
 static int m_control_dir; // 操作中ツモの回転数(0-3)
@@ -27,38 +27,13 @@ static bool m_network_vs_flag; // 通信対戦中かどうかのフラグ
 
 static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 
-
-
 #define m_myfield ( m_game.getMyField() )
 #define m_sub_x ( m_control_x + (m_control_dir==1?1:(m_control_dir==3?-1:0)) )
 #define m_sub_y ( m_control_y + (m_control_dir==0?1:(m_control_dir==2?-1:0)) )
 /*----------------------------------------------------------------------*/
 //      初期化
 /*----------------------------------------------------------------------*/
-void loadConfig( string &hostname, int &port, string &nickname ){
-	cout<<"setting.confの読み込み"<<endl;
-	ifstream ifs( "setting.conf" );
-	if( !ifs ){ cout<<"setting.conf のオープンに失敗"<<endl; return;}
-	ifs >> hostname >> port >> nickname;
-}
 void SceneNetworkPlayInit(){
-	// 画像データ読み込み
-	m_ui.load();
-	
-	// setting.conf 読み込み
-	string hostname = "localhost";
-	string nickname = "NO_NAME";
-	int  port = 2424;
-	loadConfig( hostname, port, nickname );
-
-	// Connection関係
-	cout<<"サーバに接続 "<<hostname<<":"<<port<<endl;
-	m_connection.connect( (char *)hostname.c_str(), port );
-	cout<<"ニックネームを送信:"<<nickname<<endl;
-	m_connection.sendNickname( (char *)nickname.c_str(), nickname.size() );
-	cout<<"ランダムマッチに参加申請を送信"<<endl;
-	m_connection.sendJoin();
-
 	// オブジェクト初期化
 	m_control_x = 3;
 	m_control_y = 12;
@@ -67,6 +42,24 @@ void SceneNetworkPlayInit(){
 	m_decision_flag = true;
 	m_ready_flag = false;
 	m_game.init();
+
+	// 画像データ読み込み
+	m_ui.load();
+	
+	// setting.ini 読み込み
+	m_setting.load();
+
+	// Connection関係
+	string hostname = m_setting.getHostName();
+	string nickname = m_setting.getNickName();
+	int    port     = m_setting.getPort();
+	cout<<"サーバに接続 "<<hostname<<":"<<port<<endl;
+	m_connection.connect( (char *)hostname.c_str(), port );
+	cout<<"ニックネームを送信:"<<nickname<<endl;
+	m_connection.sendNickname( (char *)nickname.c_str(), nickname.size() );
+	cout<<"ランダムマッチに参加申請を送信"<<endl;
+	m_connection.sendJoin();
+
 }
 
 void beginNetworkVS(){
