@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Annimation.cpp" />
+    <ClCompile Include="Connection.cpp" />
     <ClCompile Include="Fps.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
@@ -19,16 +20,19 @@
     <ClCompile Include="SceneNetworkPlay.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneTitle.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Annimation.h" />
     <ClInclude Include="AnnimationManager.h" />
+    <ClInclude Include="Connection.h" />
     <ClInclude Include="Fps.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneNetworkPlay.h" />
     <ClInclude Include="SceneTitle.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C173D742-BAD8-4EA0-99BE-B7E5BA174073}</ProjectGuid>

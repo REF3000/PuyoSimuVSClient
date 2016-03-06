@@ -1,8 +1,10 @@
-#include "SceneManager.h"
 #include "SceneNetworkPlay.h"
 #include "DxLib.h"
+#include "SceneManager.h"
 #include "input.h"
 #include "Game.h"
+#include "UI.h"
+#include "Connection.h"
 #include "AnnimationManager.h"
 #include <iostream>
 #include <fstream>
@@ -13,10 +15,9 @@ using namespace std;
 
 extern SceneManager scene_manager;
 
-static int m_flame; // 経過フレーム数
-
-static SOCKET m_socket;
 static Game m_game;
+static Connection m_connection;
+static UI m_ui;
 static int m_control_x; // 操作中ツモの軸x位置(1-6)
 static int m_control_y; // 操作中ツモの軸y位置(1-13)
 static int m_control_dir; // 操作中ツモの回転数(0-3)
@@ -26,9 +27,7 @@ static bool m_network_vs_flag; // 通信対戦中かどうかのフラグ
 
 static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 
-static int m_graphic_handle[256];
 
-static AnnimationManager m_annimation_manager;
 
 #define m_myfield ( m_game.getMyField() )
 #define m_sub_x ( m_control_x + (m_control_dir==1?1:(m_control_dir==3?-1:0)) )
@@ -43,66 +42,30 @@ void loadConfig( string &hostname, int &port, string &nickname ){
 	ifs >> hostname >> port >> nickname;
 }
 void SceneNetworkPlayInit(){
-
-	LoadDivGraph( "data/ojama.png" , 7 , 7 , 1 , 24 , 24 , m_graphic_handle ) ;
-
+	// 画像データ読み込み
+	m_ui.load();
+	
+	// setting.conf 読み込み
 	string hostname = "localhost";
 	string nickname = "NO_NAME";
 	int  port = 2424;
 	loadConfig( hostname, port, nickname );
 
+	// Connection関係
 	cout<<"サーバに接続 "<<hostname<<":"<<port<<endl;
-
-	WSADATA wsaData;
-
-	struct sockaddr_in addr;
-
-	WSAStartup(MAKEWORD(2,0), &wsaData);
-
-	m_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
-	addr.sin_addr.S_un.S_addr = inet_addr(hostname.c_str());
-	if (addr.sin_addr.S_un.S_addr == 0xffffffff) {
-		struct hostent *host;
-
-		host = gethostbyname(hostname.c_str());
-		if (host == NULL) {
-			printf("error:gethostbyname(%s)\n",hostname);
-			return;
-		}
-		addr.sin_addr.S_un.S_addr =
-			*(unsigned int *)host->h_addr_list[0];
-	}
-
-	int r = connect(m_socket, (struct sockaddr *)&addr, sizeof(addr));
-	if( r==-1 ){
-		cout<<"サーバへの接続が失敗"<<endl; return;
-	}
-	cout<<"サーバへの接続が成功"<<endl;
-	u_long val=1;
-	ioctlsocket(m_socket, FIONBIO, &val); // ノンブロッキング設定
-
-	char buf[64] = {1,nickname.size()};
-	for( size_t i=0; i<nickname.size(); ++i ) buf[2+i] = nickname[i];
-	buf[2+nickname.size()] = 2;
-	buf[3+nickname.size()] = 0;
-	send(m_socket, buf, 4+nickname.size(), 0);
+	m_connection.connect( (char *)hostname.c_str(), port );
 	cout<<"ニックネームを送信:"<<nickname<<endl;
+	m_connection.sendNickname( (char *)nickname.c_str(), nickname.size() );
 	cout<<"ランダムマッチに参加申請を送信"<<endl;
+	m_connection.sendJoin();
 
+	// オブジェクト初期化
 	m_control_x = 3;
-	m_control_y = 13;
+	m_control_y = 12;
 	m_control_dir = 0;
-
 	m_network_vs_flag = false;
-
-	m_flame = 0;
 	m_decision_flag = true;
-
 	m_ready_flag = false;
-
 	m_game.init();
 }
 
@@ -116,17 +79,81 @@ void beginNetworkVS(){
 /*----------------------------------------------------------------------*/
 //      更新
 /*----------------------------------------------------------------------*/
-void processRecv();
-void sendReady(){
-	char buf[] = {3,0};
-	send(m_socket, buf, sizeof(buf), 0);
-	cout<<"readyを送信"<<endl;
+//------------------------------------------------------------------------
+void matchingNotice(){
+	printf("matching成立通知受信\n");
 }
-void sendAction(){
-	Action act = m_game.getAction(1);
-	char buf[] = {4,3,act.id,act.pos,act.dir};
-	send(m_socket, buf, sizeof(buf), 0);
-	printf("actionを送信(%d,%d,%d)\n",act.id,act.pos,act.dir);
+void setEnemyName( char buf[], int len ){
+	char name[64] = {0};
+	for( int i=0; i<len; ++i ) name[i] = buf[i];
+	printf("対戦相手名受信:%s\n",name);
+}
+void setNextTable( char buf[] ){
+	printf("Nextテーブル受信\n");
+	Next next(buf);
+	m_game.setNext( next );
+}
+void beginTurn(){
+	printf("ターン開始通知受信\n");
+	if( !m_network_vs_flag ){
+		beginNetworkVS();
+		return;
+	}
+	// 設置アニメーション
+	for( int i=0; i<2; ++i ){
+		//Action act = m_game.getHistory(1+i,0);
+		
+		//if( act.id!=1 ) continue;
+		//printf("%d:(%d,%d,%d)\n",i+1,act.id,act.pos,act.dir);
+		//fallAnnimation *anime = new fallAnnimation( act.pos*30, 50, 500, GetColor(255,0,0) );
+		//m_annimation_manager.add( anime );
+	}
+
+	m_game.goNextStep();
+	if( m_game.getStatus(1)==0 ) m_decision_flag = false;
+	if( m_game.getStatus(1)==1 ){
+		m_game.setAction(Action(0,0,0),1);
+		m_connection.sendAction( m_game.getAction(1) );
+		m_connection.sendReady();
+		m_decision_flag = true;
+	}
+	m_control_x = 3;
+	m_control_y = 13;
+	m_control_dir = 0;
+}
+void setEnemyAction( char buf[] ){
+	printf("enemy行動通知受信\n");
+	Action act( buf[0], buf[1], buf[2] );
+	m_game.setAction(act,2);
+}
+void processRecv(){
+	while(true){
+		if( !m_connection.doRecv() ) return;
+		char *recv_buf = m_connection.getRecvBuffer();
+		int  recv_size = m_connection.getRecvSize();
+		switch( m_connection.getRecvPhase() ){
+		case HEADER:
+			if( recv_buf[0]==1 ){ // マッチング成立通知
+				matchingNotice();
+			}
+			if( recv_buf[0]==4 ){ // ターン開始通知
+				beginTurn();
+			}
+			break;
+		case ENEMY_NAME:
+			setEnemyName( recv_buf, recv_size );
+			break;
+		case NEXT_TABLE:
+			setNextTable( recv_buf );
+			break;
+		case ENEMY_ACTION:
+			setEnemyAction( recv_buf );
+			break;
+		default:
+			printf("error:未定義の受信phaseに到達\n");
+		}
+		m_connection.forwardRecvPhase();
+	}
 }
 bool checkControlFlag(){
 	return m_game.getAction(1).id==-1;
@@ -168,9 +195,7 @@ void rotateLeft(){
 	m_control_dir = (m_control_dir+3)%4;
 }
 int SceneNetworkPlayUpdate(){
-	++m_flame;
 	processRecv();
-	m_annimation_manager.update();
 	// 
 	if( GetStateKey(KEY_INPUT_ESCAPE) == 1 ){
 		scene_manager.setNextScene( TITLE );
@@ -183,7 +208,7 @@ int SceneNetworkPlayUpdate(){
 	// 通信対戦開始前の処理
 	if( !m_network_vs_flag && !m_ready_flag ){
 		if( GetStateKey(KEY_INPUT_RETURN) == 1 ){
-			sendReady();
+			m_connection.sendReady();
 			m_ready_flag = true;
 		}
 		return 0;
@@ -211,8 +236,8 @@ int SceneNetworkPlayUpdate(){
 	if( GetStateKey(KEY_INPUT_DOWN) == 1 ){
 		if( checkControlFlag() ){
 			m_game.setAction( Action(1,m_control_x,m_control_dir),1 );
-			sendAction();
-			sendReady();
+			m_connection.sendAction( m_game.getAction(1) );
+			m_connection.sendReady();
 			m_decision_flag = true;
 			return 0;
 		}
@@ -220,8 +245,8 @@ int SceneNetworkPlayUpdate(){
 	if( GetStateKey(KEY_INPUT_P) == 1 ){
 		if( checkControlFlag() && m_game.getHistory(1,1).id!=0 ){
 			m_game.setAction( Action(0,0,0),1 );
-			sendAction();
-			sendReady();
+			m_connection.sendAction( m_game.getAction(1) );
+			m_connection.sendReady();
 			m_decision_flag = true;
 			return 0;
 		}
@@ -232,261 +257,32 @@ int SceneNetworkPlayUpdate(){
 /*----------------------------------------------------------------------*/
 //      描画
 /*----------------------------------------------------------------------*/
-static void drawPuyo( int x, int y, int w, int h, int puyo ){
-	int color = 0x0;
-	switch( puyo ){
-	case 0 : return;
-	case 1 : color = 0xff0000; break;
-	case 2 : color = 0x00ff00; break;
-	case 3 : color = 0x0000ff; break;
-	case 4 : color = 0xffff00; break;
-	case 9 : color = 0xffffff; break;
-	}
-	DrawOval( x, y, w/2, h/2, color, true );
-}
-const int CELL_W = 30;
-const int CELL_H = 30;
-const int LEFT = 100;
-const int TOP  = 50;
-const int GAP  = 270; // 1pと2pの間隔
-void doDrawField( int left, int top, Field field ){
-	for(int x=1;  x<=6; ++x ){
-		for(int y=13; y>=1; --y ){
-			const int SX = left+(x-1) *CELL_W;
-			const int SY = top +(13-y)*CELL_H;
-			// 背景の描画
-			const int CELL_COLOR = (y==13)?0x444444:0x888888;
-			DrawBox( SX, SY, SX+CELL_W, SY+CELL_H, CELL_COLOR, true );
-			DrawBox( SX, SY, SX+CELL_W, SY+CELL_H, 0x222222, false );
-			// 窒息点の描画
-			if( x==3 && y==12 )
-				DrawLine( SX+4, SY+4, SX+CELL_W-4, SY+CELL_H-4, 0xff0000, 3 ),
-				DrawLine( SX+4, SY+CELL_H-4, SX+CELL_W-4, SY+4, 0xff0000, 3 );
-			// フィールドぷよの描画
-			int puyo = field.get(x,y);
-			drawPuyo( SX+CELL_W/2, SY+CELL_H/2, CELL_W-1, CELL_H-1, puyo );
-		}}
-}
-void drawField( Field field, int player_id ){
-	doDrawField( LEFT+(player_id==2?GAP:0), TOP, field );
-}
-void drawTumo( int x, int y, int dir, Tumo tumo, int player_id ){
-	// TODO:きれいに書く
-	int sx = x+(dir==1?1:(dir==3?-1:0));
-	int sy = y+(dir==0?1:(dir==2?-1:0));
-	if( checkControlFlag() && m_decision_flag==false && player_id==1 && ((m_flame%60)>30) ){
-		drawPuyo( LEFT+(int)(( x-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)(( 13-y+0.5)*CELL_H), CELL_W, CELL_H, 9 );
-		drawPuyo( LEFT+(int)((sx-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)((13-sy+0.5)*CELL_H), CELL_W, CELL_H, 9 );
-	}
-	if( m_network_vs_flag && m_game.getAction(2).id==-1 && player_id==2 && ((m_flame%60)>30) ){
-		drawPuyo( LEFT+(int)(( x-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)(( 13-y+0.5)*CELL_H), CELL_W, CELL_H, 9 );
-		drawPuyo( LEFT+(int)((sx-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)((13-sy+0.5)*CELL_H), CELL_W, CELL_H, 9 );
-	}
-	drawPuyo( LEFT+(int)(( x-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)(( 13-y+0.5)*CELL_H), CELL_W-1, CELL_H-1, tumo.first );
-	drawPuyo( LEFT+(int)((sx-0.5)*CELL_W)+(player_id==2?GAP:0), TOP+(int)((13-sy+0.5)*CELL_H), CELL_W-1, CELL_H-1, tumo.second );
-}
-void drawNext( Tumo next1p1, Tumo next2p1, Tumo next1p2, Tumo next2p2 ){
-	// 1p
-	drawPuyo( 300,  80       , CELL_W-1, CELL_H-1, next1p1.second );
-	drawPuyo( 300,  80+CELL_H, CELL_W-1, CELL_H-1, next1p1.first  );
-	drawPuyo( 308, 145       , CELL_W-4, CELL_H-4, next2p1.second );
-	drawPuyo( 308, 145+CELL_H, CELL_W-4, CELL_H-4, next2p1.first  );
-	// 2p
-	drawPuyo( 350,  80       , CELL_W-1, CELL_H-1, next1p2.second );
-	drawPuyo( 350,  81+CELL_H, CELL_W-1, CELL_H-1, next1p2.first  );
-	drawPuyo( 342, 145       , CELL_W-4, CELL_H-4, next2p2.second );
-	drawPuyo( 342, 145+CELL_H, CELL_W-4, CELL_H-4, next2p2.first  );
-}
-void drawInfo(){
-	// 1p
-	DrawFormatString( 270,10,GetColor(255,255,255),"%d:%d", m_game.getOjamaStock(1), m_game.getOjamaNotice(1) );
-	// 2p
-	DrawFormatString( 340,10,GetColor(255,255,255),"%d:%d", m_game.getOjamaStock(2), m_game.getOjamaNotice(2) );
-}
-void drawScore(){
-	// 1p
-	DrawFormatString( 100,445,GetColor(255,255,255),"score:%d", m_game.getScore(1) );
-	// 2p
-	DrawFormatString( 360,445,GetColor(255,255,255),"score:%d", m_game.getScore(2) );
-}
-void drawOjamaNotice( int ojama_num, int player_id ){
-	const int SX = (player_id==1) ? 95 : 365;
-	const int SY = 15;
-
-	vector<int> ojama;
-	while( ojama_num>0 ){
-		if( ojama_num >= 400 ){ ojama_num-=400; ojama.push_back(5); continue; }
-		if( ojama_num >= 300 ){ ojama_num-=300; ojama.push_back(4); continue; }
-		if( ojama_num >= 200 ){ ojama_num-=200; ojama.push_back(3); continue; }
-		if( ojama_num >=  30 ){ ojama_num-= 30; ojama.push_back(2); continue; }
-		if( ojama_num >=   6 ){ ojama_num-=  6; ojama.push_back(1); continue; }
-		if( ojama_num >=   1 ){ ojama_num-=  1; ojama.push_back(0); continue; }
-	}
-	int lim=65;
-	int x = SX;
-	int y = SY;
-	for( size_t i=0; i<ojama.size(); ++i ){
-		int o = ojama[i];
-		if( o==0 ) lim-= 5;
-		else       lim-=10;
-		if( lim<0 ) break; // 6.5超えたら省略
-		DrawExtendGraph( x, y, x+36, y+36, m_graphic_handle[o], true );
-		x += (o==0) ? 20:28;
-	}
-}
 void SceneNetworkPlayDraw(){
-	drawField( m_game.getMyField(),    1 );
-	drawField( m_game.getEnemyField(), 2 );
-	drawTumo( m_control_x, m_control_y, m_control_dir, m_game.getNextTumo(0,1), 1 );
-	drawTumo(           3,          13,             0, m_game.getNextTumo(0,2), 2 );
-	drawNext( m_game.getNextTumo(1,1), m_game.getNextTumo(2,1),
-		m_game.getNextTumo(1,2), m_game.getNextTumo(2,2) );
-	drawInfo();
-	drawScore();
-	drawOjamaNotice( m_game.getOjamaNotice(1) + m_game.getOjamaStock(1), 1 );
-	drawOjamaNotice( m_game.getOjamaNotice(2) + m_game.getOjamaStock(2), 2 );
-	m_annimation_manager.draw();
+	m_ui.drawBackGround();
+	m_ui.drawField( m_game.getMyField(),    1 );
+	m_ui.drawField( m_game.getEnemyField(), 2 );
+	m_ui.drawTumo( m_control_x, m_control_y, m_control_dir, m_game.getNextTumo(0,1), 1 );
+	m_ui.drawTumo(           3,          12,             0, m_game.getNextTumo(0,2), 2 );
+	m_ui.drawNext( m_game.getNextTumo(1,1), m_game.getNextTumo(2,1), 1 );
+	m_ui.drawNext( m_game.getNextTumo(1,2), m_game.getNextTumo(2,2), 2 );
+	m_ui.drawScore( m_game.getScore(1), 1 );
+	m_ui.drawScore( m_game.getScore(2), 2 );
+	m_ui.drawFrame();
+	m_ui.drawOjamaNotice( m_game.getOjamaNotice(1) + m_game.getOjamaStock(1), 1 );
+	m_ui.drawOjamaNotice( m_game.getOjamaNotice(2) + m_game.getOjamaStock(2), 2 );
+	
+	m_ui.drawDebugInfo( m_game );
 }
 
 /*----------------------------------------------------------------------*/
 //      終了処理
 /*----------------------------------------------------------------------*/
 void SceneNetworkPlayFin(){
-	char buf[] = {6,0};
-	send(m_socket, buf, sizeof(buf), 0);
-	cout<<"finを送信"<<endl;
-
-	closesocket(m_socket);
-	WSACleanup();
+	m_connection.sendFin();
+	m_connection.close();
+	m_ui.free();
 }
 
 
 
-//------------------------------------------------------------------------
-// 受信データの処理いろいろ
-enum eRecvPhase{ HEADER, ENEMY_NAME, NEXT_TABLE, ENEMY_ACTION };
-static char       recv_buf[1024];
-static int        next_recv_size  = 2;
-static eRecvPhase next_recv_phase = HEADER;
-
-// socketからデータを読み出す
-// next_recv_sizeまで読み出し終わったらtrueを返す
-bool doRecv(){
-	static int recv_len = 0; // 現在までに読み出し終わっている長さ
-	// next_recv_sizeまでrecv_bufにたまるまで1byteずつ読み出し続ける
-	while( next_recv_size>recv_len ){
-		if( recv(m_socket, recv_buf+recv_len, 1, 0)<=0 ) break;
-		++recv_len;
-	}
-	if(next_recv_size<=recv_len){
-		recv_len = 0;
-		return true;
-	}
-	return false;
-}
-void matchingNotice();
-void setEnemyName( char buf[], int len );
-void beginTurn();
-void setNextTable( char buf[] );
-void setEnemyAction( char buf[] );
-void processRecv(){
-	while(true){
-		if( !doRecv() ) return;
-		switch( next_recv_phase ){
-		case HEADER:
-			if( recv_buf[0]==1 ){ // マッチング成立通知
-				matchingNotice();
-				break;
-			}
-			if( recv_buf[0]==2 ){ // 対戦相手の名前通知
-				next_recv_phase = ENEMY_NAME;
-				next_recv_size  = recv_buf[1];
-				break;
-			}
-			if( recv_buf[0]==3 ){ // nextテーブルの通知
-				next_recv_phase = NEXT_TABLE;
-				next_recv_size  = 256;
-				break;
-			}
-			if( recv_buf[0]==4 ){ // ターン開始通知
-				beginTurn();
-				break;
-			}
-			if( recv_buf[0]==5 ){ // 相手の行動通知
-				next_recv_phase = ENEMY_ACTION;
-				next_recv_size  = 3;
-				break;
-			}
-			printf("erro:サーバから未定義のメッセージを受信\n");
-			break;
-		case ENEMY_NAME:
-			setEnemyName( recv_buf, next_recv_size );
-			next_recv_phase = HEADER;
-			next_recv_size  = 2;
-			break;
-		case NEXT_TABLE:
-			setNextTable( recv_buf );
-			next_recv_phase = HEADER;
-			next_recv_size  = 2;
-			break;
-		case ENEMY_ACTION:
-			setEnemyAction( recv_buf );
-			next_recv_phase = HEADER;
-			next_recv_size  = 2;
-			break;
-		default:
-			printf("error:未定義の受信phaseに到達\n");
-		}
-	}
-}
-
-
-//------------------------------------------------------------------------
-// 受信データの処理いろいろ
-void matchingNotice(){
-	printf("matching成立通知受信\n");
-}
-void setEnemyName( char buf[], int len ){
-	char name[64] = {0};
-	for( int i=0; i<len; ++i ) name[i] = buf[i];
-	printf("対戦相手名受信:%s\n",name);
-}
-void setNextTable( char buf[] ){
-	printf("Nextテーブル受信\n");
-	Next next(buf);
-	m_game.setNext( next );
-}
-void beginTurn(){
-	printf("ターン開始通知受信\n");
-	if( !m_network_vs_flag ){
-		beginNetworkVS();
-		return;
-	}
-	// 設置アニメーション
-	for( int i=0; i<2; ++i ){
-		//Action act = m_game.getHistory(1+i,0);
-		
-		//if( act.id!=1 ) continue;
-		//printf("%d:(%d,%d,%d)\n",i+1,act.id,act.pos,act.dir);
-		//fallAnnimation *anime = new fallAnnimation( act.pos*30, 50, 500, GetColor(255,0,0) );
-		//m_annimation_manager.add( anime );
-	}
-
-	m_game.goNextStep();
-	if( m_game.getStatus(1)==0 ) m_decision_flag = false;
-	if( m_game.getStatus(1)==1 ){
-		m_game.setAction(Action(0,0,0),1);
-		sendAction();
-		sendReady();
-		m_decision_flag = true;
-	}
-	m_control_x = 3;
-	m_control_y = 13;
-	m_control_dir = 0;
-}
-void setEnemyAction( char buf[] ){
-	printf("enemy行動通知受信\n");
-	Action act( buf[0], buf[1], buf[2] );
-	m_game.setAction(act,2);
-}
 

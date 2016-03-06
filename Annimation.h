@@ -1,3 +1,4 @@
+#pragma once
 #include "DxLib.h"
 #include <iostream>
 using namespace std;
@@ -31,6 +32,7 @@ public :
 
 };
 
+#if 0
 class fallAnnimation : public Annimation{
 public :
 	int x,y;
@@ -55,3 +57,4 @@ public :
 	}
 
 };
+#endif

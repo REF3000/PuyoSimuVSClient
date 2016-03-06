@@ -1,3 +1,4 @@
+#pragma once
 #include <utility>
 #include <random>
 #include <vector>
