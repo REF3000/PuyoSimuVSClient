@@ -33,7 +33,7 @@ static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 /*----------------------------------------------------------------------*/
 //      初期化
 /*----------------------------------------------------------------------*/
-void SceneNetworkPlayInit(){
+void SceneNetworkPlay::init( PARAM param ){
 	// オブジェクト初期化
 	m_control_x = 3;
 	m_control_y = 12;
@@ -188,7 +188,7 @@ void rotateLeft(){
 
 	m_control_dir = (m_control_dir+3)%4;
 }
-int SceneNetworkPlayUpdate(){
+int SceneNetworkPlay::update(){
 	processRecv();
 	// 
 	if( GetStateKey(KEY_INPUT_ESCAPE) == 1 ){
@@ -251,7 +251,7 @@ int SceneNetworkPlayUpdate(){
 /*----------------------------------------------------------------------*/
 //      描画
 /*----------------------------------------------------------------------*/
-void SceneNetworkPlayDraw(){
+void SceneNetworkPlay::draw(){
 	m_ui.drawBackGround();
 	m_ui.drawField( m_game.getMyField(),    1 );
 	m_ui.drawField( m_game.getEnemyField(), 2 );
@@ -271,7 +271,7 @@ void SceneNetworkPlayDraw(){
 /*----------------------------------------------------------------------*/
 //      終了処理
 /*----------------------------------------------------------------------*/
-void SceneNetworkPlayFin(){
+void SceneNetworkPlay::fin(){
 	m_connection.sendFin();
 	m_connection.close();
 	m_ui.free();
