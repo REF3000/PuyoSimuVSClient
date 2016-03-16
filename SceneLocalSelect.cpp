@@ -7,7 +7,7 @@ using namespace std;
 
 extern SceneManager scene_manager;
 
-const char NAME_LIST[][64] = { "Player1 vs Player2（未実装）", "Player1 vs AI_01", "Player1 vs AI_02（未実装）" };
+const char NAME_LIST[][64] = { "Player1 vs Player1（とこぷよ）", "Player1 vs AI_01", "Player1 vs AI_02（未実装）" };
 const int  NAME_LIST_SIZE = 3;
 
 void SceneLocalSelect::init( PARAM param ){   // 初期化 起動時に呼ぶ
@@ -28,10 +28,10 @@ int  SceneLocalSelect::update(){ // 更新 毎フレーム呼ぶ
 	if( GetStateKey(KEY_INPUT_RETURN) == 1 ){
 		switch( m_select ){
 		case 0:
-			//scene_manager.setNextScene( LOCAL_SELECT );
+			scene_manager.setNextScene( LOCAL_MATCH_TOKOPUYO );
 			break;
 		case 1:
-			scene_manager.setNextScene( NETWORK_PLAY );
+			scene_manager.setNextScene( LOCAL_MATCH_AI );
 			break;
 		case 2:
 			break;

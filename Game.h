@@ -245,7 +245,7 @@ struct Game{
 	void goNextStep(){
 		for( int i=0; i<2; ++i ){
 			if( action[i].id==-1 ){
-				printf("actionがセットされていない :player%d",i+1);
+				printf("actionがセットされていない :player%d\n",i+1);
 				return;
 			}
 		}
@@ -266,6 +266,7 @@ struct Game{
 					}
 				}
 			} else {             // 連鎖中
+				action[id].id = 0;
 				forwardChain(id);
 				field[id].fall();
 				if( canFire(id) ){

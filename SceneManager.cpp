@@ -2,15 +2,19 @@
 #include "SceneTitle.h"
 #include "SceneNetworkPlay.h"
 #include "SceneLocalSelect.h"
+#include "SceneLocalMatchAI.h"
+#include "SceneLocalMatchTokopuyo.h"
 #include <cstdio>
 using namespace std;
 
 
 Scene *newScene( eSCENE scene_id ){
 	switch( scene_id ){
-	case TITLE       : return new SceneTitle();
-	case NETWORK_PLAY: return new SceneNetworkPlay();
-	case LOCAL_SELECT: return new SceneLocalSelect();
+	case TITLE         : return new SceneTitle();
+	case NETWORK_PLAY  : return new SceneNetworkPlay();
+	case LOCAL_SELECT  : return new SceneLocalSelect();
+	case LOCAL_MATCH_AI: return new SceneLocalMatchAI();
+	case LOCAL_MATCH_TOKOPUYO: return new SceneLocalMatchTokopuyo();
 	default:
 		puts("error:ñ¢íËã`ÇÃÉVÅ[Éì");
 		return new SceneTitle();

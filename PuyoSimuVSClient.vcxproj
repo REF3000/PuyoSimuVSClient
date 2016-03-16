@@ -14,9 +14,12 @@
     <ClCompile Include="Annimation.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="Fps.cpp" />
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SceneLocalMatchAI.cpp" />
+    <ClCompile Include="SceneLocalMatchTokopuyo.cpp" />
     <ClCompile Include="SceneLocalSelect.cpp" />
     <ClCompile Include="SceneNetworkPlay.cpp" />
     <ClCompile Include="SceneManager.cpp" />
@@ -29,9 +32,12 @@
     <ClInclude Include="AnnimationManager.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Fps.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneLocalMatchAI.h" />
+    <ClInclude Include="SceneLocalMatchTokopuyo.h" />
     <ClInclude Include="SceneLocalSelect.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneNetworkPlay.h" />
