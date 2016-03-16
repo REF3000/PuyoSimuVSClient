@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "SceneTitle.h"
 #include "SceneNetworkPlay.h"
+#include "SceneLocalSelect.h"
 #include <cstdio>
 using namespace std;
 
@@ -25,6 +26,8 @@ int  SceneManager::update(){
 			SceneTitleInit(); break;
 		case NETWORK_PLAY:
 			SceneNetworkPlayInit(); break;
+		case LOCAL_SELECT:
+			SceneLocalSelectInit(); break;
 		default:
 			puts("error:未定義のシーン");
 		}
@@ -35,6 +38,8 @@ int  SceneManager::update(){
 		return SceneTitleUpdate();
 	case NETWORK_PLAY:
 		return SceneNetworkPlayUpdate();
+	case LOCAL_SELECT:
+		return SceneLocalSelectUpdate();
 	default:
 		puts("error:未定義のシーン");
 		return -1;
@@ -48,6 +53,8 @@ void SceneManager::draw(){
 		SceneTitleDraw(); break;
 	case NETWORK_PLAY:
 		SceneNetworkPlayDraw(); break;
+	case LOCAL_SELECT:
+		SceneLocalSelectDraw(); break;
 	default:
 		puts("error:未定義のシーン");
 	}

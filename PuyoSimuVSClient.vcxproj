@@ -17,6 +17,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SceneLocalSelect.cpp" />
     <ClCompile Include="SceneNetworkPlay.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneTitle.cpp" />
@@ -30,6 +31,7 @@
     <ClInclude Include="Fps.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="SceneLocalSelect.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneNetworkPlay.h" />
     <ClInclude Include="SceneTitle.h" />

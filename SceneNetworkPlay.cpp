@@ -62,6 +62,7 @@ void SceneNetworkPlayInit(){
 
 }
 
+
 void beginNetworkVS(){
 	if( m_network_vs_flag ) return;
 	m_network_vs_flag = true;
@@ -111,7 +112,7 @@ void beginTurn(){
 		m_decision_flag = true;
 	}
 	m_control_x = 3;
-	m_control_y = 13;
+	m_control_y = 12;
 	m_control_dir = 0;
 }
 void setEnemyAction( char buf[] ){

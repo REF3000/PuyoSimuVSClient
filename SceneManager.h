@@ -1,6 +1,6 @@
 
 enum eSCENE{
-	NONE, TITLE, NETWORK_PLAY, 
+	NONE, TITLE, NETWORK_PLAY, LOCAL_SELECT
 };
 
 class SceneManager{
