@@ -18,6 +18,8 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OldAI.cpp" />
+    <ClCompile Include="SimpleAI.cpp" />
     <ClCompile Include="SceneLocalMatchAI.cpp" />
     <ClCompile Include="SceneLocalMatchTokopuyo.cpp" />
     <ClCompile Include="SceneLocalSelect.cpp" />
@@ -35,6 +37,9 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="OldAI.h" />
+    <ClInclude Include="Puyo.h" />
+    <ClInclude Include="PuyoAI.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneLocalMatchAI.h" />
     <ClInclude Include="SceneLocalMatchTokopuyo.h" />
@@ -43,6 +48,7 @@
     <ClInclude Include="SceneNetworkPlay.h" />
     <ClInclude Include="SceneTitle.h" />
     <ClInclude Include="Setting.h" />
+    <ClInclude Include="SimpleAI.h" />
     <ClInclude Include="UI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

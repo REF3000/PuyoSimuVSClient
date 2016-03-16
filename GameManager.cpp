@@ -120,6 +120,12 @@ void GameManager::turnLeft( int player_id ){
 void GameManager::setAction( int player_id, int action_id ){
 	m_player[player_id-1].action_id = action_id;
 }
+void GameManager::setAction( int player_id, Action action ){
+	int id = player_id-1;
+	m_player[id].action_id = action.id;
+	m_player[id].x   = action.pos;
+	m_player[id].dir = action.dir;
+}
 
 void GameManager::goNext(){
 	m_game.setAction( Action(m_player[0].action_id,m_player[0].x,m_player[0].dir), 1 );

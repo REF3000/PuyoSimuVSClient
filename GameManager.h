@@ -34,5 +34,8 @@ public:
 	void turnRight( int player_id );
 	void turnLeft ( int player_id );
 	void setAction( int player_id, int action_id );
+	void setAction( int player_id, Action action );
 	void goNext();
+
+	Game &getGame(){ return m_game; }
 };
