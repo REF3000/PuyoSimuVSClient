@@ -8,6 +8,17 @@ Action OldAI::think( Field field, std::vector<Tumo> next ){
 
 
 
+
+
+
+
+
+// 以下、触らぬソースに祟りなし…
+
+
+
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -498,6 +509,12 @@ Action AI_test( Field field, vector<Tumo> next ){
 		nt[i][1] = next[i].second;
 	}
 	AI_RESULT result = obj.getResult( fd, nt, 2 );
+
+	// -1回避
+	if( result.pos==-1 ){
+		result.pos = 3;
+		result.dir = 0;
+	}
 
 	return Action( 1, result.pos, result.dir );
 }
