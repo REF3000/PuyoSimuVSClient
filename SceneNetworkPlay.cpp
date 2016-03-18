@@ -2,10 +2,130 @@
 #include "DxLib.h"
 #include "SceneManager.h"
 #include "input.h"
+#include <iostream>
+#include "OldAI.h"
+using namespace std;
+
+extern SceneManager scene_manager;
+
+void SceneNetworkPlay::init( PARAM param ){   // 初期化 起動時に呼ぶ
+	m_gm.init();
+	m_gm.start();
+	// setting.ini 読み込み
+	m_setting.load();
+	// Connection関係
+	string hostname = m_setting.getHostName();
+	string nickname = m_setting.getNickName();
+	int    port     = m_setting.getPort();
+	cout<<"サーバに接続 "<<hostname<<":"<<port<<endl;
+	m_connection.connect( (char *)hostname.c_str(), port );
+	cout<<"ニックネームを送信:"<<nickname<<endl;
+	m_connection.sendNickname( (char *)nickname.c_str(), nickname.size() );
+	cout<<"ランダムマッチに参加申請を送信"<<endl;
+	m_connection.sendJoin();
+}
+
+
+int  SceneNetworkPlay::update(){ // 更新 毎フレーム呼ぶ
+	processRecv();
+	m_gm.update();
+
+	if( GetStateKey(KEY_INPUT_ESCAPE) == 1 ){
+		scene_manager.setNextScene( LOCAL_SELECT );
+		return 0;
+	}
+
+	int r = GetStateKey(KEY_INPUT_RIGHT);
+	if( r == 1 )      m_gm.moveRight(1);
+	if( r>20 && r%2 ) m_gm.moveRight(1);
+
+	int l = GetStateKey(KEY_INPUT_LEFT);
+	if( l == 1 )      m_gm.moveLeft(1);
+	if( l>20 && l%2 ) m_gm.moveLeft(1);
+
+	if( GetStateKey(KEY_INPUT_X) == 1 ){
+		m_gm.turnRight(1);
+	}
+	
+	if( GetStateKey(KEY_INPUT_Z) == 1 ){
+		m_gm.turnLeft(1);
+	}
+
+	if( GetStateKey(KEY_INPUT_DOWN) == 1 ){
+		m_gm.setAction(1,1);
+		m_gm.goNext();
+	}
+
+	if( GetStateKey(KEY_INPUT_P) == 1 ){
+		m_gm.setAction(1,0);
+		m_gm.goNext();
+	}
+
+	return 0;
+}
+
+void SceneNetworkPlay::draw(){   // 描画 更新後に毎回呼ぶ
+	m_gm.draw();
+}
+
+void SceneNetworkPlay::fin(){    // 終了処理
+	m_gm.fin();
+}
+
+
+void SceneNetworkPlay::processRecv(){
+	while(true){
+		if( !m_connection.doRecv() ) return;
+		char *recv_buf = m_connection.getRecvBuffer();
+		int  recv_size = m_connection.getRecvSize();
+		switch( m_connection.getRecvPhase() ){
+		case HEADER:
+			if( recv_buf[0]==1 ){ // マッチング成立通知
+				//matchingNotice();
+			}
+			if( recv_buf[0]==4 ){ // ターン開始通知
+				//beginTurn();
+			}
+			break;
+		case ENEMY_NAME:
+			//setEnemyName( recv_buf, recv_size );
+			break;
+		case NEXT_TABLE:
+			//setNextTable( recv_buf );
+			break;
+		case ENEMY_ACTION:
+			//setEnemyAction( recv_buf );
+			break;
+		default:
+			printf("error:未定義の受信phaseに到達\n");
+		}
+		m_connection.forwardRecvPhase();
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "SceneNetworkPlay.h"
+#include "DxLib.h"
+#include "SceneManager.h"
+#include "input.h"
 #include "Game.h"
 #include "UI.h"
-#include "Connection.h"
-#include "Setting.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -33,7 +153,7 @@ static bool m_ready_flag; // 試合開始前にreadyを送信したかどうかのフラグ
 /*----------------------------------------------------------------------*/
 //      初期化
 /*----------------------------------------------------------------------*/
-void SceneNetworkPlay::init( PARAM param ){
+void SceneNetworkPlay2::init( PARAM param ){
 	// オブジェクト初期化
 	m_control_x = 3;
 	m_control_y = 12;
@@ -188,7 +308,7 @@ void rotateLeft(){
 
 	m_control_dir = (m_control_dir+3)%4;
 }
-int SceneNetworkPlay::update(){
+int SceneNetworkPlay2::update(){
 	processRecv();
 	// 
 	if( GetStateKey(KEY_INPUT_ESCAPE) == 1 ){
@@ -251,7 +371,7 @@ int SceneNetworkPlay::update(){
 /*----------------------------------------------------------------------*/
 //      描画
 /*----------------------------------------------------------------------*/
-void SceneNetworkPlay::draw(){
+void SceneNetworkPlay2::draw(){
 	m_ui.drawBackGround();
 	m_ui.drawField( m_game.getMyField(),    1 );
 	m_ui.drawField( m_game.getEnemyField(), 2 );
@@ -271,7 +391,7 @@ void SceneNetworkPlay::draw(){
 /*----------------------------------------------------------------------*/
 //      終了処理
 /*----------------------------------------------------------------------*/
-void SceneNetworkPlay::fin(){
+void SceneNetworkPlay2::fin(){
 	m_connection.sendFin();
 	m_connection.close();
 	m_ui.free();

@@ -70,9 +70,18 @@ void SceneLocalMatchAI::fin(){    // èIóπèàóù
 
 Action SceneLocalMatchAI::getAiAction(){
 	Game game = m_gm.getGame();
+
 	vector<Tumo> next;
 	next.push_back( game.getNextTumo(0,2) );
 	next.push_back( game.getNextTumo(1,2) );
 	next.push_back( game.getNextTumo(2,2) );
-	return m_ai->think( game.getEnemyField(), next );
+
+	vector<Tumo> next2;
+	next2.push_back( game.getNextTumo(0,1) );
+	next2.push_back( game.getNextTumo(1,1) );
+	next2.push_back( game.getNextTumo(2,1) );
+
+	Action act = m_ai->think( game.getEnemyField(), next, game.getMyField(), next2 );
+	printf("Action(%d,%d,%d)\n",act.id,act.pos,act.dir);
+	return act;
 }

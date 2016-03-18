@@ -522,10 +522,10 @@ Action AI_test( Field field, vector<Tumo> next, int limit ){
 	AI_RESULT result = obj.getResult( fd, nt, (limit==0)?0:((limit==1)?1:2) );
 
 	// -1‰ñ”ð
-	if( result.pos==-1 ){
-		result.pos = 3;
-		result.dir = 0;
-	}
+	if( result.pos==-1 ) return Action( 1, 3, 0 );
+	// ƒoƒO’l‰ñ”ð
+	if( result.pos<1 || 6<result.pos ||
+		result.dir<0 || 3<result.dir ) return Action( 1, 3, 0 );
 
 	return Action( 1, result.pos, result.dir );
 }

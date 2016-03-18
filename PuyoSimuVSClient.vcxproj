@@ -19,6 +19,7 @@
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OldAI.cpp" />
+    <ClCompile Include="PuyoAIUtility.cpp" />
     <ClCompile Include="SimpleAI.cpp" />
     <ClCompile Include="SceneLocalMatchAI.cpp" />
     <ClCompile Include="SceneLocalMatchTokopuyo.cpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="OldAI.h" />
     <ClInclude Include="Puyo.h" />
     <ClInclude Include="PuyoAI.h" />
+    <ClInclude Include="PuyoAIUtility.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneLocalMatchAI.h" />
     <ClInclude Include="SceneLocalMatchTokopuyo.h" />

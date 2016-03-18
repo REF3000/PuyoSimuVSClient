@@ -136,6 +136,11 @@ struct Game{
 		ojama_notice[id] += ojama_stock[id];
 		ojama_stock[id] = 0;
 	}
+	bool checkAllClear( int id ){
+		for( int x=1; x<=6; ++x )
+			for( int y=1; y<=13; ++y ) if( field[id].get(x,y)!=0 ) return false;
+		return true;
+	}
 	void goNextStep(){
 		for( int i=0; i<2; ++i ){
 			if( action[i].id==-1 ){
@@ -166,6 +171,7 @@ struct Game{
 				if( canFire(id) ){
 					//continue;
 				} else {
+					if( checkAllClear(id) ) addScore( id, 2100 );
 					// TODO:’‚‘§”»’è
 					fallOjama( id );
 					ojama_trans_flag[ (id+1)%2 ] = true;
