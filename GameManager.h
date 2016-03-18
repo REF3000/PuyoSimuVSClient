@@ -29,13 +29,16 @@ public:
 	void draw();
 	void fin();
 
-	void moveRight( int player_id );
-	void moveLeft ( int player_id );
-	void turnRight( int player_id );
-	void turnLeft ( int player_id );
-	void setAction( int player_id, int action_id );
-	void setAction( int player_id, Action action );
-	void goNext();
+	void   moveRight( int player_id );
+	void   moveLeft ( int player_id );
+	void   turnRight( int player_id );
+	void   turnLeft ( int player_id );
+	void   setAction( int player_id, int action_id );
+	void   setAction( int player_id, Action action );
+	Action getAction( int player_id );
+	void   setNext  ( Next next );
+	bool   isChain  ( int player_id );
+	void   goNext();
 
 	Game &getGame(){ return m_game; }
 };

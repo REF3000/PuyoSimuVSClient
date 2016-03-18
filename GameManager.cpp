@@ -1,4 +1,5 @@
 #include "GameManager.h"
+#include "PuyoAIUtility.h"
 
 #define axis_x(id) ( m_player[(id)].x )
 #define axis_y(id) ( m_player[(id)].y )
@@ -126,7 +127,10 @@ void GameManager::setAction( int player_id, Action action ){
 	m_player[id].x   = action.pos;
 	m_player[id].dir = action.dir;
 }
-
+Action GameManager::getAction( int player_id ){
+	int id = player_id-1;
+	return Action( m_player[id].action_id, m_player[id].x, m_player[id].dir );
+}
 void GameManager::goNext(){
 	m_game.setAction( Action(m_player[0].action_id,m_player[0].x,m_player[0].dir), 1 );
 	m_game.setAction( Action(m_player[1].action_id,m_player[1].x,m_player[1].dir), 2 );
@@ -137,4 +141,12 @@ void GameManager::goNext(){
 		m_player[i].dir = 0;
 		m_player[i].action_id = -1;
 	}
+}
+
+void GameManager::setNext( Next next ){
+	m_game.setNext( next );
+}
+
+bool GameManager::isChain( int player_id ){
+	return canFireField( m_game.getMyField() );
 }
