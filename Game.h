@@ -50,6 +50,9 @@ struct Game{
 	Field &getEnemyField(){
 		return field[1];
 	};
+	Field &getField( int player_id ){
+		return field[player_id-1];
+	}
 	void setNext( Next next ){
 		this->next = next;
 	}

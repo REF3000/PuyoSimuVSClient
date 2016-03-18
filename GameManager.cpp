@@ -16,7 +16,7 @@ void GameManager::init(){
 	m_ui.load();
 
 	// いろいろ初期化
-	Player ini = { 3,12,0,-1 };
+	Player ini = { 3,12,0,-1,false };
 	m_player[0] = ini;
 	m_player[1] = ini;
 }
@@ -58,6 +58,31 @@ bool GameManager::checkAvailablePosition( int id ){
 	return true;
 }
 
+bool GameManager::canQuickTurn( int id ){
+	int       x = m_player[id].x;
+	int       y = m_player[id].y;
+	Field field = m_game.getField( id+1 );
+	if( (m_player[id].dir==0 || m_player[id].dir==2) &&
+		field.get(x+1,y)!=0 && field.get(x-1,y) &&
+		field.get(x,y-1)==0 && field.get(x,y+1)==0 ) return true;
+	return false;
+}
+bool GameManager::processQuickTurn( int id ){
+	if( canQuickTurn(id) ){
+		if( m_player[id].quick_flag ){
+			m_player[id].dir = (m_player[id].dir+2)%4;
+			if( !checkAvailablePosition(id) ) ++m_player[id].y;
+			m_player[id].quick_flag = false;
+		} else {
+			m_player[id].quick_flag = true;
+		}
+		return true;
+	} else {
+		m_player[id].quick_flag = false;
+	}
+	return false;
+}
+
 void GameManager::moveRight( int player_id ){
 	++axis_x(player_id-1);
 	if( checkAvailablePosition(player_id-1) ) return;
@@ -72,6 +97,9 @@ void GameManager::moveLeft( int player_id ){
 
 void GameManager::turnRight( int player_id ){
 	int id = player_id-1;
+	// quickturn判定を最初に行う
+	if( processQuickTurn(id) ) return;
+	// とりあえず回転させてダメなら色々
 	m_player[id].dir = (m_player[id].dir+1)%4;
 	if( checkAvailablePosition(id) ) return;
 	switch( m_player[id].dir ){
@@ -96,6 +124,9 @@ void GameManager::turnRight( int player_id ){
 
 void GameManager::turnLeft( int player_id ){
 	int id = player_id-1;
+	// quickturn判定を最初に行う
+	if( processQuickTurn(id) ) return;
+	// とりあえず回転させてダメなら色々
 	m_player[id].dir = (m_player[id].dir+3)%4;
 	if( checkAvailablePosition(id) ) return;
 	switch( m_player[id].dir ){
@@ -140,6 +171,7 @@ void GameManager::goNext(){
 		m_player[i].y   = 12;
 		m_player[i].dir = 0;
 		m_player[i].action_id = -1;
+		m_player[i].quick_flag = false;
 	}
 }
 

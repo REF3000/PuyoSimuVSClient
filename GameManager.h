@@ -11,6 +11,7 @@ class GameManager {
 		int y;
 		int dir;
 		int action_id;
+		bool quick_flag;
 	};
 
 	Game m_game;
@@ -18,6 +19,8 @@ class GameManager {
 	Player m_player[2];
 
 	bool checkAvailablePosition( int id );
+	bool canQuickTurn( int id );
+	bool processQuickTurn( int id );
 
 public:
 
