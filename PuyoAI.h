@@ -4,13 +4,13 @@
 
 class PuyoAI {
 public:
-	virtual Action think( Field field, std::vector<Tumo> next )=0;
+	virtual Action think( Field field, std::vector<Tumo> next, Field field2, std::vector<Tumo> next2 )=0;
 	
 };
 
 class SampleAI : public PuyoAI {
 public:
-	Action think( Field field, std::vector<Tumo> next ){
+	Action think( Field field, std::vector<Tumo> next, Field field2, std::vector<Tumo> next2 ){
 		return Action(1,2,1);
 	}
 };

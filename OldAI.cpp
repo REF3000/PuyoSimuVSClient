@@ -1,9 +1,15 @@
 #include "OldAI.h"
+#include "PuyoAIUtility.h"
+#include <iostream>
+using namespace std;
 
-Action AI_test( Field field, std::vector<Tumo> next );
+Action AI_test( Field field, std::vector<Tumo> next, int limit );
 
-Action OldAI::think( Field field, std::vector<Tumo> next ){
-	return AI_test( field, next );
+Action OldAI::think( Field field, std::vector<Tumo> next, Field field2, std::vector<Tumo> next2 ){
+	// 敵発火確認
+	FireInfo fi = fireField(field2);
+
+	return AI_test( field, next, fi.limit );
 }
 
 
@@ -14,7 +20,6 @@ Action OldAI::think( Field field, std::vector<Tumo> next ){
 
 
 // 以下、触らぬソースに祟りなし…
-
 
 
 
@@ -325,6 +330,7 @@ struct ANALYZE{
 };
 vector<ANALYZE> anal; // *
 
+int g_lim;
 
 // フィールドについて解析
 int analyze_field( FIELD field ){
@@ -377,7 +383,10 @@ int analyze_field( FIELD field ){
 	for( int i=0; i<6; ++i ) space -= height[i];
 	if( space<20 ) max_score /= 2;
 
-
+	// limitに応じて理想発火を減算
+	if( g_lim==0 ) max_score=0;
+	if( g_lim==1 ) max_score=0; //!
+	if( g_lim==2 ) max_score=0; //!
 
 	//value = book_score*100 + shape_score;
 	value = max(max_score,fire_score) + shape_score;
@@ -492,7 +501,8 @@ AI_RESULT PuyoAITest::getResult( int field[13][6], int next[][2], int next_num )
 }
 
 
-Action AI_test( Field field, vector<Tumo> next ){
+Action AI_test( Field field, vector<Tumo> next, int limit ){
+	g_lim = limit;
 	static PuyoAITest obj;
 
 	int fd[13][6];
@@ -508,7 +518,8 @@ Action AI_test( Field field, vector<Tumo> next ){
 		nt[i][0] = next[i].first;
 		nt[i][1] = next[i].second;
 	}
-	AI_RESULT result = obj.getResult( fd, nt, 2 );
+
+	AI_RESULT result = obj.getResult( fd, nt, (limit==0)?0:((limit==1)?1:2) );
 
 	// -1回避
 	if( result.pos==-1 ){
