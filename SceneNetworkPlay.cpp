@@ -4,6 +4,8 @@
 #include "input.h"
 #include <iostream>
 #include "OldAI.h"
+#include "UI.h"
+
 using namespace std;
 
 extern SceneManager scene_manager;
@@ -113,6 +115,7 @@ void SceneNetworkPlay::matchingNotice(){
 	printf("matching成立通知受信\n");
 	m_connection.sendReady();
 	m_action_flag = true;
+	UI::gi().playMatch();
 }
 void SceneNetworkPlay::setEnemyName( char buf[], int len ){
 	char name[64] = {0};
@@ -143,4 +146,5 @@ void SceneNetworkPlay::beginTurn(){
 void SceneNetworkPlay::setEnemyAction( char buf[] ){
 	printf("enemy行動通知受信\n");
 	m_enemy_action = Action( buf[0], buf[1], buf[2] );
+	UI::gi().playNotice();
 }

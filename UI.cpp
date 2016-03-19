@@ -22,6 +22,11 @@ void UI::load(){
 	gh_frame = LoadGraph( "data/frame.png" );
 	LoadDivGraph( "data/ojama.png" , 7 , 7 , 1 , 24 , 24 , gh_ojama ) ;
 	LoadDivGraph( "data/puyo.png" , 7 , 7 , 1 , 30 , 30 , gh_puyo ) ;
+	sh_move   = LoadSoundMem( "data/move.wav" );
+	sh_rotate = LoadSoundMem( "data/rotate.wav" );
+	sh_notice = LoadSoundMem( "data/notice.wav" );
+	sh_drop   = LoadSoundMem( "data/drop.wav" );
+	sh_match  = LoadSoundMem( "data/match.wav" );
 }
 void UI::free(){
 	DeleteGraph( gh_back );
@@ -120,4 +125,25 @@ void UI::drawDebugInfo( Game game ){
 	DrawFormatString( 270,10,GetColor(255,0,0),"%d:%d", game.getOjamaStock(1), game.getOjamaNotice(1) );
 	// 2p
 	DrawFormatString( 340,10,GetColor(255,0,0),"%d:%d", game.getOjamaStock(2), game.getOjamaNotice(2) );
+}
+
+
+void UI::playMove(){
+	PlaySoundMem( sh_move, DX_PLAYTYPE_BACK );
+}
+
+void UI::playRotate(){
+	PlaySoundMem( sh_rotate, DX_PLAYTYPE_BACK );
+}
+
+void UI::playNotice(){
+	PlaySoundMem( sh_notice, DX_PLAYTYPE_BACK );
+}
+
+void UI::playDrop(){
+	PlaySoundMem( sh_drop, DX_PLAYTYPE_BACK );
+}
+
+void UI::playMatch(){
+	PlaySoundMem( sh_match, DX_PLAYTYPE_BACK );
 }

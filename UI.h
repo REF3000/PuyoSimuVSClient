@@ -24,6 +24,11 @@ class UI{
 	int gh_ojama[10];
 	int gh_puyo[10];
 	AnnimationManager am_drop;
+	int sh_move;
+	int sh_rotate;
+	int sh_notice;
+	int sh_drop;
+	int sh_match;
 
 	void drawPuyo( int x, int y, int puyo );
 
@@ -40,6 +45,19 @@ public:
 	void drawNext( Tumo next1, Tumo next2, int player_id );
 	void drawScore( int score, int player_id );
 	void drawOjamaNotice( int ojama_num, int player_id );
+	void playMove();
+	void playRotate();
+	void playNotice();
+	void playDrop();
+	void playMatch();
 
 	void drawDebugInfo( Game game );
+
+	static UI& getInstance(){
+		static UI inst;
+		return inst;
+	}
+	static UI& gi(){ // ‰¡’…
+		return UI::getInstance();
+	}
 };
