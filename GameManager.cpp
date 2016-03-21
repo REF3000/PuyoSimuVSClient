@@ -27,7 +27,7 @@ void GameManager::start(){
 }
 
 void GameManager::update(){
-
+	m_am.update();
 }
 
 void GameManager::draw(){
@@ -45,6 +45,8 @@ void GameManager::draw(){
 	UI::gi().drawOjamaNotice( m_game.getOjamaNotice(2) + m_game.getOjamaStock(2), 2 );
 	
 	UI::gi().drawDebugInfo( m_game );
+
+	m_am.draw();
 }
 
 void GameManager::fin(){

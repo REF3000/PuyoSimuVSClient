@@ -1,6 +1,6 @@
 #pragma once
 #include "Game.h"
-
+#include "AnnimationManager.h"
 
 
 class GameManager {
@@ -14,8 +14,8 @@ class GameManager {
 	};
 
 	Game m_game;
-	//UI   m_ui;
 	Player m_player[2];
+	AnnimationManager m_am;
 
 	bool checkAvailablePosition( int id );
 	bool canQuickTurn( int id );

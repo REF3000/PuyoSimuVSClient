@@ -6,8 +6,8 @@ using namespace std;
 class Annimation{
 public:
 
-	virtual int update();
-	virtual void draw();
+	virtual int update() = 0;
+	virtual void draw() = 0;
 
 };
 

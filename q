@@ -1,0 +1,24 @@
+* db8c26d [31m (HEAD -> develop, origin/develop) [32m2016-03-19 [34mk-yamamoto [mse追加、UIをSingletonにした
+* 20029d1 [31m [32m2016-03-18 [34mk-yamamoto [mクイックターンの実装
+* 4e67c16 [31m [32m2016-03-18 [34mk-yamamoto [mNetworkPlayの修正
+* c80e145 [31m [32m2016-03-18 [34mk-yamamoto [mOldAI修正,全消し実装
+* 0fb79d3 [31m [32m2016-03-18 [34mk-yamamoto [mOldAI修正
+* 2ee3902 [31m [32m2016-03-17 [34mk-yamamoto [mOldAIの修正
+* 4687b77 [31m [32m2016-03-17 [34mk-yamamoto [m昔のAIをとりあえず動くようにした
+* 5758d8a [31m [32m2016-03-17 [34mk-yamamoto [mとこぷよモードとAI対戦の雛形を作成
+* 6a28b3b [31m [32m2016-03-16 [34mk-yamamoto [mシーン管理をポリモーフィズムによるものに変更
+* a819452 [31m [32m2016-03-16 [34mk-yamamoto [mローカル対戦のセレクト画面追加
+* e9b82b0 [31m [32m2016-03-06 [34mk-yamamoto [m設定ファイル周りの変更
+* 9d9ab2e [31m [32m2016-03-06 [34mk-yamamoto [mソース整理,画像差し替え
+* d991afd [31m [32m2016-03-04 [34mk-yamamoto [mおじゃま画像差し替え、アニメーション管理機構の実装
+* aca8b2a [31m [32m2016-03-02 [34mk-yamamoto [mおじゃま予告表示を実装
+* a2ccd29 [31m [32m2016-02-28 [34mk-yamamoto [mbugfix:発火時履歴書き忘れ、初期化忘れ
+* 651bc16 [31m [32m2016-02-28 [34mk-yamamoto [mパスの実装
+* 3b7e47e [31m [32m2016-02-27 [34mk-yamamoto [mタイトル追加
+* b42ff88 [31m [32m2016-02-27 [34mk-yamamoto [m壁蹴り実装
+* d3b671a [31m [32m2016-02-27 [34mk-yamamoto [m落下ボーナス実装
+* ecebdd8 [31m [32m2016-02-22 [34mk-yamamoto [m簡単な相殺まで
+* 380a8ae [31m [32m2016-02-15 [34mk-yamamoto [m連鎖の処理追加
+* 891d458 [31m [32m2016-02-14 [34mk-yamamoto [madd readme
+* 4518b00 [31m [32m2016-02-14 [34mk-yamamoto [madd LICENSE
+* 604b2c8 [31m (origin/master, origin/HEAD, master) [32m2016-02-14 [34mk-yamamoto [m1st commit
