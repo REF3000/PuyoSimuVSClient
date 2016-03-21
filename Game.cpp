@@ -21,4 +21,3 @@ int Field::doDeleteConnection( int x, int y, int puyo ){
 		   doDeleteConnection( x, y-1, puyo ) +
 		   doDeleteConnection( x-1, y, puyo ) + 1;
 }
-const int Game::OJAMA_TABLE[] = {1,2,3,4,5,6};

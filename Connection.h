@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include "Game.h"
 
-enum eRecvPhase{ HEADER, ENEMY_NAME, NEXT_TABLE, ENEMY_ACTION };
+enum eRecvPhase{ HEADER, ENEMY_NAME, NEXT_TABLE, OJAMA_TABLE, ENEMY_ACTION, FINISH_INFO };
 
 class Connection{
 

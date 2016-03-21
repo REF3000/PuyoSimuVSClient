@@ -181,6 +181,7 @@ Action GameManager::getAction( int player_id ){
 	return Action( m_player[id].action_id, m_player[id].x, m_player[id].dir );
 }
 void GameManager::goNext(){
+	if( m_game.getStatus()!=0 ) return;
 	m_game.setAction( Action(m_player[0].action_id,m_player[0].x,m_player[0].dir), 1 );
 	m_game.setAction( Action(m_player[1].action_id,m_player[1].x,m_player[1].dir), 2 );
 	m_game.goNextStep();
@@ -192,6 +193,17 @@ void GameManager::goNext(){
 		m_player[i].quick_flag = false;
 	}
 	UI::gi().playDrop();
+	switch( m_game.getStatus() ){
+	case 1:
+		UI::gi().playWin();
+		break;
+	case 2:
+		UI::gi().playLose();
+		break;
+	case 3:
+		UI::gi().playDraw();
+		break;
+	}
 }
 
 void GameManager::setNext( Next next ){
@@ -200,4 +212,8 @@ void GameManager::setNext( Next next ){
 
 bool GameManager::isChain( int player_id ){
 	return canFireField( m_game.getMyField() );
+}
+
+void GameManager::setOjamaTable( char *buf ){
+	m_game.setOjamaTable( buf );
 }

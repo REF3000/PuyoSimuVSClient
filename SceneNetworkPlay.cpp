@@ -102,8 +102,14 @@ void SceneNetworkPlay::processRecv(){
 		case NEXT_TABLE:
 			setNextTable( recv_buf );
 			break;
+		case OJAMA_TABLE:
+			setOjamaTable( recv_buf );
+			break;
 		case ENEMY_ACTION:
 			setEnemyAction( recv_buf );
+			break;
+		case FINISH_INFO:
+			setFinishInfo( recv_buf );
 			break;
 		default:
 			printf("error:未定義の受信phaseに到達\n");
@@ -127,6 +133,10 @@ void SceneNetworkPlay::setNextTable( char buf[] ){
 	Next next(buf);
 	m_gm.setNext( next );
 }
+void SceneNetworkPlay::setOjamaTable( char buf[] ){
+	printf("おじゃまテーブル受信\n");
+	m_gm.setOjamaTable( buf );
+}
 void SceneNetworkPlay::beginTurn(){
 	printf("ターン開始通知受信\n");
 	m_action_flag = true;
@@ -147,4 +157,14 @@ void SceneNetworkPlay::setEnemyAction( char buf[] ){
 	printf("enemy行動通知受信\n");
 	m_enemy_action = Action( buf[0], buf[1], buf[2] );
 	UI::gi().playNotice();
+}
+
+void SceneNetworkPlay::setFinishInfo( char buf[] ){
+	printf("ゲーム終了時情報受信\n");
+	if( buf[0]==1 ) printf("勝利！\n");
+	if( buf[0]==2 ) printf("敗北…\n");
+	if( buf[0]==3 ) printf("引き分け\n");
+	m_gm.setAction(2,m_enemy_action);
+	m_gm.goNext();
+	m_action_flag = false;
 }

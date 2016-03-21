@@ -29,6 +29,9 @@ class UI{
 	int sh_notice;
 	int sh_drop;
 	int sh_match;
+	int sh_win;
+	int sh_lose;
+	int sh_draw;
 
 	void drawPuyo( int x, int y, int puyo );
 
@@ -50,6 +53,9 @@ public:
 	void playNotice();
 	void playDrop();
 	void playMatch();
+	void playWin();
+	void playLose();
+	void playDraw();
 
 	void drawDebugInfo( Game game );
 

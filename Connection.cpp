@@ -134,6 +134,14 @@ void Connection::forwardRecvPhase(){
 			recv_phase = ENEMY_ACTION;
 			recv_next_size  = 3;
 			return;
+		case 6:
+			recv_phase = FINISH_INFO;
+			recv_next_size  = 1;
+			return;
+		case 7:
+			recv_phase = OJAMA_TABLE;
+			recv_next_size = 6;
+			return;
 		default:
 			printf("未定義のメッセージ\n");
 		}
@@ -141,9 +149,13 @@ void Connection::forwardRecvPhase(){
 	case ENEMY_NAME:
 	case NEXT_TABLE:
 	case ENEMY_ACTION:
+	case OJAMA_TABLE:
+	case FINISH_INFO:
 		recv_phase = HEADER;
 		recv_next_size = 2;
 		return;
+	default:
+		printf("未定義のメッセージ\n");
 	}
 	
 }

@@ -23,7 +23,7 @@ struct Game{
 	int ojama_notice[2];
 	int ojama_stock[2];
 	int ojama_count[2];
-	static const int OJAMA_TABLE[6];
+	int OJAMA_TABLE[6];
 
 	Game(){
 		init();
@@ -41,8 +41,9 @@ struct Game{
 			ojama_count[i] = 0;
 			field[i].init();
 			history[i].clear();
-
 		}
+		for( int i=0; i<6; ++i )
+			OJAMA_TABLE[i] = i+1;
 	}
 	Field &getMyField(){
 		return field[0];
@@ -55,6 +56,9 @@ struct Game{
 	}
 	void setNext( Next next ){
 		this->next = next;
+	}
+	void setOjamaTable( char *buf ){
+		for( int i=0; i<6; ++i ) OJAMA_TABLE[i] = buf[i];
 	}
 	Tumo getNextTumo( int num, int player_id ){ // num手先のツモを返す
 		int cnt = 0; // 現在までのパスでない手数を数える
@@ -144,6 +148,11 @@ struct Game{
 			for( int y=1; y<=13; ++y ) if( field[id].get(x,y)!=0 ) return false;
 		return true;
 	}
+	bool isDeath( int id ){
+		if( field[id].get(3,12)==0 ) return false;
+		if( canFire(id) ) return false;
+		return true;
+	}
 	void goNextStep(){
 		for( int i=0; i<2; ++i ){
 			if( action[i].id==-1 ){
@@ -165,6 +174,7 @@ struct Game{
 						// TODO:窒息判定
 						fallOjama( id );
 						// TODO:窒息判定2
+						if( isDeath( id ) ) status[id] = 2;
 					}
 				}
 			} else {             // 連鎖中
@@ -179,6 +189,7 @@ struct Game{
 					fallOjama( id );
 					ojama_trans_flag[ (id+1)%2 ] = true;
 					// TODO:窒息判定2
+					if( isDeath( id ) ) status[id] = 2;
 					status[id] = 0;
 					chain_count[id] = 0;
 				}
@@ -210,7 +221,12 @@ struct Game{
 	int getTurn(){
 		return turn+1;
 	}
-
+	int getStatus(){
+		if( status[0]==2 && status[1]==2 ) return 3;
+		if( status[0]==2 ) return 2;
+		if( status[1]==2 ) return 1;
+		return 0;
+	}
 	void debug(){
 		int cnt = 0; // 現在までのパスでない手数を数える
 		int id = 0;

@@ -20,6 +20,8 @@ class SceneNetworkPlay : public Scene {
 	void setNextTable( char buf[] );
 	void beginTurn();
 	void setEnemyAction( char buf[] );
+	void setOjamaTable( char buf[] );
+	void setFinishInfo( char buf[] );
 public:
 
 	void init( PARAM param );

@@ -41,6 +41,7 @@ public:
 	void   setAction( int player_id, Action action );
 	Action getAction( int player_id );
 	void   setNext  ( Next next );
+	void   setOjamaTable( char *buf );
 	bool   isChain  ( int player_id );
 	void   goNext();
 

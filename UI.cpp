@@ -27,6 +27,9 @@ void UI::load(){
 	sh_notice = LoadSoundMem( "data/notice.wav" );
 	sh_drop   = LoadSoundMem( "data/drop.wav" );
 	sh_match  = LoadSoundMem( "data/match.wav" );
+	sh_win    = LoadSoundMem( "data/win.wav" );
+	sh_lose   = LoadSoundMem( "data/lose.wav" );
+	sh_draw   = LoadSoundMem( "data/draw.wav" );
 }
 void UI::free(){
 	DeleteGraph( gh_back );
@@ -146,4 +149,16 @@ void UI::playDrop(){
 
 void UI::playMatch(){
 	PlaySoundMem( sh_match, DX_PLAYTYPE_BACK );
+}
+
+void UI::playWin(){
+	PlaySoundMem( sh_win, DX_PLAYTYPE_BACK );
+}
+
+void UI::playLose(){
+	PlaySoundMem( sh_lose, DX_PLAYTYPE_BACK );
+}
+
+void UI::playDraw(){
+	PlaySoundMem( sh_draw, DX_PLAYTYPE_BACK );
 }
