@@ -66,14 +66,14 @@ bool GameManager::canQuickTurn( int id ){
 	Field field = m_game.getField( id+1 );
 	if( (m_player[id].dir==0 || m_player[id].dir==2) &&
 		field.get(x+1,y)!=0 && field.get(x-1,y) &&
-		field.get(x,y-1)==0 && field.get(x,y+1)==0 ) return true;
+		y==12 ) return true;
 	return false;
 }
 bool GameManager::processQuickTurn( int id ){
 	if( canQuickTurn(id) ){
 		if( m_player[id].quick_flag ){
 			m_player[id].dir = (m_player[id].dir+2)%4;
-			if( !checkAvailablePosition(id) ) ++m_player[id].y;
+			++m_player[id].y;
 			m_player[id].quick_flag = false;
 		} else {
 			m_player[id].quick_flag = true;
@@ -88,7 +88,7 @@ bool GameManager::processQuickTurn( int id ){
 void GameManager::moveRight( int player_id ){
 	++axis_x(player_id-1);
 	if( checkAvailablePosition(player_id-1) ){
-		UI::gi().playMove();
+		if( player_id==1 ) UI::gi().playMove();
 		return;
 	}
 	--axis_x(player_id-1);
@@ -97,14 +97,14 @@ void GameManager::moveRight( int player_id ){
 void GameManager::moveLeft( int player_id ){
 	--axis_x(player_id-1);
 	if( checkAvailablePosition(player_id-1) ){
-		UI::gi().playMove();
+		if( player_id==1 ) UI::gi().playMove();
 		return;
 	}
 	++axis_x(player_id-1);
 }
 
 void GameManager::turnRight( int player_id ){
-	if( doTurnRight( player_id ) ) UI::gi().playRotate();
+	if( doTurnRight( player_id ) && player_id==1 ) UI::gi().playRotate();
 }
 
 bool GameManager::doTurnRight( int player_id ){
@@ -136,7 +136,7 @@ bool GameManager::doTurnRight( int player_id ){
 }
 
 void GameManager::turnLeft( int player_id ){
-	if( doTurnLeft( player_id ) ) UI::gi().playRotate();
+	if( doTurnLeft( player_id ) && player_id==1 ) UI::gi().playRotate();
 }
 
 bool GameManager::doTurnLeft( int player_id ){
